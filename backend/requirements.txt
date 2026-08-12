@@ -1,0 +1,16 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+Flask-JWT-Extended
+Flask-CORS
+python-dotenv
+Werkzeug
+opencv-python
+mediapipe
+numpy
+pandas
+scikit-learn
+librosa
+soundfile
+joblib
+gunicorn
