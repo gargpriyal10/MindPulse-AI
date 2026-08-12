@@ -23,4 +23,8 @@ def create_app():
             "message": "MindPulse AI Backend is running"
         }, 200
 
+    from app.routes import auth_bp
+
+    app.register_blueprint(auth_bp)
+
     return app
