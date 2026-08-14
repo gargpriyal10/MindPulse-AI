@@ -1,0 +1,1552 @@
+.monitoring-page {
+  min-height: 100vh;
+
+  display: flex;
+
+  background:
+    radial-gradient(
+      circle at 70% 0%,
+      rgba(20, 184, 166, 0.035),
+      transparent 28%
+    ),
+    #080e14;
+
+  color: #f8fafc;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+.monitoring-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+
+  width: 235px;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 1.25rem;
+
+  background: rgba(8, 14, 20, 0.95);
+
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+
+  backdrop-filter: blur(16px);
+
+  z-index: 20;
+}
+
+.monitoring-brand {
+  display: flex;
+  align-items: center;
+
+  gap: 0.65rem;
+
+  color: #f8fafc;
+
+  font-size: 0.95rem;
+  font-weight: 650;
+
+  text-decoration: none;
+}
+
+.monitoring-brand strong {
+  color: #14b8a6;
+}
+
+.monitoring-brand__icon {
+  width: 37px;
+  height: 37px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #14b8a6;
+
+  background: rgba(20, 184, 166, 0.07);
+
+  border: 1px solid rgba(20, 184, 166, 0.18);
+
+  border-radius: 10px;
+}
+
+.monitoring-nav {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.25rem;
+
+  margin-top: 2.5rem;
+}
+
+.monitoring-nav__label {
+  margin: 0 0 0.55rem 0.7rem;
+
+  color: #465366;
+
+  font-size: 0.57rem;
+  font-weight: 700;
+
+  letter-spacing: 0.14em;
+}
+
+.monitoring-nav__label--second {
+  margin-top: 1.7rem;
+}
+
+.monitoring-nav__item {
+  display: flex;
+  align-items: center;
+
+  gap: 0.7rem;
+
+  padding: 0.7rem 0.75rem;
+
+  color: #68768a;
+
+  border: 1px solid transparent;
+
+  border-radius: 0.65rem;
+
+  font-size: 0.74rem;
+
+  text-decoration: none;
+
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.monitoring-nav__item:hover {
+  color: #cbd5e1;
+
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.monitoring-nav__item--active {
+  color: #14b8a6;
+
+  background: rgba(20, 184, 166, 0.07);
+
+  border-color: rgba(20, 184, 166, 0.12);
+}
+
+.monitoring-nav__item--active svg {
+  color: #14b8a6;
+}
+
+.monitoring-sidebar__bottom {
+  margin-top: auto;
+}
+
+.monitoring-sidebar__privacy {
+  display: flex;
+  align-items: center;
+
+  gap: 0.45rem;
+
+  padding: 0.7rem;
+
+  color: #526074;
+
+  background: rgba(20, 184, 166, 0.04);
+
+  border: 1px solid rgba(20, 184, 166, 0.08);
+
+  border-radius: 0.7rem;
+
+  font-size: 0.58rem;
+}
+
+.monitoring-sidebar__privacy svg {
+  color: #14b8a6;
+}
+
+.monitoring-sidebar__back {
+  display: flex;
+  align-items: center;
+
+  gap: 0.4rem;
+
+  margin-top: 1rem;
+
+  color: #465366;
+
+  font-size: 0.62rem;
+
+  text-decoration: none;
+}
+
+.monitoring-sidebar__back:hover {
+  color: #14b8a6;
+}
+
+/* ============================================================
+   MAIN
+   ============================================================ */
+
+.monitoring-main {
+  width: calc(100% - 235px);
+
+  margin-left: 235px;
+
+  padding: 2rem 2.2rem 1rem;
+
+  min-width: 0;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.monitoring-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 1.5rem;
+}
+
+.monitoring-header__eyebrow {
+  color: #14b8a6;
+
+  font-size: 0.56rem;
+  font-weight: 700;
+
+  letter-spacing: 0.15em;
+}
+
+.monitoring-header h1 {
+  margin: 0.4rem 0 0.3rem;
+
+  color: #f8fafc;
+
+  font-size: clamp(1.45rem, 2.4vw, 2rem);
+
+  letter-spacing: -0.04em;
+}
+
+.monitoring-header p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 0.72rem;
+}
+
+.monitoring-header__status {
+  display: flex;
+  align-items: center;
+
+  gap: 0.45rem;
+
+  padding: 0.55rem 0.7rem;
+
+  color: #7f8ca0;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  border-radius: 0.65rem;
+
+  font-size: 0.62rem;
+}
+
+.monitoring-status-dot {
+  width: 6px;
+  height: 6px;
+
+  background: #14b8a6;
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 8px rgba(20, 184, 166, 0.8);
+
+  animation: monitoring-status-pulse 2s ease-in-out infinite;
+}
+
+.monitoring-status-dot--offline {
+  background: #fb7185;
+
+  box-shadow: none;
+
+  animation: none;
+}
+
+.monitoring-header__timer {
+  display: flex;
+  align-items: center;
+
+  gap: 0.3rem;
+
+  margin-left: 0.5rem;
+  padding-left: 0.6rem;
+
+  color: #14b8a6;
+
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   SESSION BAR
+   ============================================================ */
+
+.monitoring-session-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 0.8rem;
+  padding: 0.8rem 1rem;
+
+  background: rgba(15, 23, 42, 0.6);
+
+  border: 1px solid rgba(20, 184, 166, 0.1);
+
+  border-radius: 0.8rem;
+}
+
+.monitoring-session-bar__left {
+  display: flex;
+  align-items: center;
+
+  gap: 0.65rem;
+}
+
+.monitoring-live-icon {
+  width: 32px;
+  height: 32px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #14b8a6;
+
+  background: rgba(20, 184, 166, 0.07);
+
+  border-radius: 0.55rem;
+}
+
+.monitoring-session-bar__left > div:last-child {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.12rem;
+}
+
+.monitoring-session-bar__left strong {
+  color: #cbd5e1;
+
+  font-size: 0.66rem;
+}
+
+.monitoring-session-bar__left span {
+  color: #59687c;
+
+  font-size: 0.57rem;
+}
+
+.monitoring-session-tags {
+  display: flex;
+  align-items: center;
+
+  gap: 0.5rem;
+}
+
+.monitoring-session-tags span {
+  display: flex;
+  align-items: center;
+
+  gap: 0.3rem;
+
+  padding: 0.35rem 0.5rem;
+
+  color: #68768a;
+
+  background: rgba(255, 255, 255, 0.02);
+
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  border-radius: 999px;
+
+  font-size: 0.54rem;
+}
+
+.monitoring-session-tags svg {
+  color: #14b8a6;
+}
+
+/* ============================================================
+   MAIN GRID
+   ============================================================ */
+
+.monitoring-grid {
+  display: grid;
+
+  grid-template-columns: minmax(0, 1.55fr) minmax(260px, 0.65fr);
+
+  gap: 0.8rem;
+
+  margin-bottom: 1.7rem;
+}
+
+/* ============================================================
+   CARD HEADER
+   ============================================================ */
+
+.monitoring-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  padding: 1rem 1rem 0.8rem;
+}
+
+.monitoring-emotion-card .monitoring-card-header {
+  padding: 0;
+}
+
+.monitoring-card-kicker {
+  color: #14b8a6;
+
+  font-size: 0.53rem;
+  font-weight: 700;
+
+  letter-spacing: 0.13em;
+}
+
+.monitoring-card-header h2 {
+  margin: 0.3rem 0 0;
+
+  color: #dbe3ed;
+
+  font-size: 0.9rem;
+
+  letter-spacing: -0.02em;
+}
+
+.monitoring-card-header__icon {
+  color: #526074;
+}
+
+/* ============================================================
+   CAMERA
+   ============================================================ */
+
+.monitoring-camera-card {
+  overflow: hidden;
+}
+
+.monitoring-camera-status {
+  display: flex;
+  align-items: center;
+
+  gap: 0.35rem;
+
+  padding: 0.3rem 0.45rem;
+
+  color: #14b8a6;
+
+  background: rgba(20, 184, 166, 0.06);
+
+  border: 1px solid rgba(20, 184, 166, 0.1);
+
+  border-radius: 0.4rem;
+
+  font-size: 0.52rem;
+  font-weight: 700;
+}
+
+.monitoring-camera-status span {
+  width: 5px;
+  height: 5px;
+
+  background: #14b8a6;
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 7px rgba(20, 184, 166, 0.8);
+}
+
+.monitoring-camera {
+  position: relative;
+
+  height: 350px;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(20, 184, 166, 0.06),
+      transparent 50%
+    ),
+    #050a0f;
+}
+
+.monitoring-camera__grid {
+  position: absolute;
+  inset: 0;
+
+  opacity: 0.35;
+
+  background-image:
+    linear-gradient(
+      rgba(20, 184, 166, 0.045) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(20, 184, 166, 0.045) 1px,
+      transparent 1px
+    );
+
+  background-size: 40px 40px;
+}
+
+.monitoring-camera__center {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.monitoring-camera__face {
+  position: relative;
+
+  width: 160px;
+  height: 190px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(20, 184, 166, 0.3);
+
+  border-radius: 48% 48% 44% 44%;
+
+  box-shadow:
+    0 0 35px rgba(20, 184, 166, 0.06);
+}
+
+.monitoring-face-corner {
+  position: absolute;
+
+  width: 22px;
+  height: 22px;
+
+  border-color: #14b8a6;
+
+  border-style: solid;
+}
+
+.monitoring-face-corner--tl {
+  top: -3px;
+  left: -3px;
+
+  border-width: 2px 0 0 2px;
+
+  border-radius: 8px 0 0 0;
+}
+
+.monitoring-face-corner--tr {
+  top: -3px;
+  right: -3px;
+
+  border-width: 2px 2px 0 0;
+
+  border-radius: 0 8px 0 0;
+}
+
+.monitoring-face-corner--bl {
+  bottom: -3px;
+  left: -3px;
+
+  border-width: 0 0 2px 2px;
+
+  border-radius: 0 0 0 8px;
+}
+
+.monitoring-face-corner--br {
+  right: -3px;
+  bottom: -3px;
+
+  border-width: 0 2px 2px 0;
+
+  border-radius: 0 0 8px 0;
+}
+
+.monitoring-face-placeholder {
+  position: relative;
+
+  width: 80px;
+  height: 100px;
+
+  border: 1px solid rgba(20, 184, 166, 0.12);
+
+  border-radius: 45% 45% 48% 48%;
+
+  background: rgba(20, 184, 166, 0.025);
+}
+
+.monitoring-face-eyes {
+  position: absolute;
+
+  top: 35px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  display: flex;
+
+  gap: 26px;
+}
+
+.monitoring-face-eyes span {
+  width: 5px;
+  height: 5px;
+
+  background: #14b8a6;
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 7px rgba(20, 184, 166, 0.7);
+}
+
+.monitoring-face-mouth {
+  position: absolute;
+
+  width: 25px;
+  height: 10px;
+
+  left: 50%;
+  bottom: 28px;
+
+  transform: translateX(-50%);
+
+  border-bottom: 2px solid #14b8a6;
+
+  border-radius: 50%;
+}
+
+.monitoring-face-label {
+  position: absolute;
+
+  bottom: -31px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  display: flex;
+  align-items: center;
+
+  gap: 0.35rem;
+
+  padding: 0.35rem 0.55rem;
+
+  color: #14b8a6;
+
+  background: rgba(8, 14, 20, 0.9);
+
+  border: 1px solid rgba(20, 184, 166, 0.15);
+
+  border-radius: 0.35rem;
+
+  white-space: nowrap;
+
+  font-size: 0.5rem;
+  font-weight: 700;
+}
+
+.monitoring-face-label span {
+  width: 5px;
+  height: 5px;
+
+  background: #14b8a6;
+
+  border-radius: 50%;
+}
+
+.monitoring-camera__top,
+.monitoring-camera__bottom {
+  position: absolute;
+  z-index: 5;
+
+  left: 1rem;
+  right: 1rem;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: #536174;
+
+  font-size: 0.5rem;
+}
+
+.monitoring-camera__top {
+  top: 0.8rem;
+}
+
+.monitoring-camera__bottom {
+  bottom: 0.8rem;
+}
+
+.monitoring-camera__bottom > span {
+  display: flex;
+  align-items: center;
+
+  gap: 0.3rem;
+}
+
+.monitoring-camera-dot {
+  width: 5px;
+  height: 5px;
+
+  background: #14b8a6;
+
+  border-radius: 50%;
+}
+
+.monitoring-camera__ended,
+.monitoring-camera__paused {
+  position: absolute;
+  z-index: 10;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(5, 10, 15, 0.82);
+
+  backdrop-filter: blur(5px);
+}
+
+.monitoring-camera__ended > div,
+.monitoring-camera__paused {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 0.45rem;
+
+  color: #64748b;
+
+  text-align: center;
+}
+
+.monitoring-camera__ended svg,
+.monitoring-camera__paused svg {
+  color: #14b8a6;
+}
+
+.monitoring-camera__ended strong,
+.monitoring-camera__paused strong {
+  color: #cbd5e1;
+
+  font-size: 0.78rem;
+}
+
+.monitoring-camera__ended span,
+.monitoring-camera__paused span {
+  font-size: 0.6rem;
+}
+
+.monitoring-camera-controls {
+  display: flex;
+  align-items: center;
+
+  gap: 0.55rem;
+
+  padding: 0.8rem 1rem;
+}
+
+.monitoring-control-button {
+  display: flex;
+  align-items: center;
+
+  gap: 0.35rem;
+
+  padding: 0.5rem 0.7rem;
+
+  color: #8b98aa;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+
+  border-radius: 0.55rem;
+
+  font: inherit;
+  font-size: 0.6rem;
+
+  cursor: pointer;
+
+  transition: 180ms ease;
+}
+
+.monitoring-control-button:hover {
+  color: #14b8a6;
+
+  border-color: rgba(20, 184, 166, 0.2);
+}
+
+.monitoring-control-button--danger:hover {
+  color: #fb7185;
+
+  border-color: rgba(251, 113, 133, 0.2);
+}
+
+/* ============================================================
+   CURRENT EMOTION
+   ============================================================ */
+
+.monitoring-emotion-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.monitoring-current-emotion {
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding-top: 1.2rem;
+}
+
+.monitoring-current-emotion__orb {
+  position: relative;
+
+  width: 105px;
+  height: 105px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 1rem;
+
+  border: 1px solid rgba(20, 184, 166, 0.2);
+
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 35px rgba(20, 184, 166, 0.07);
+
+  animation: monitoring-orb 3s ease-in-out infinite;
+}
+
+.monitoring-current-emotion__orb::before {
+  content: "";
+
+  position: absolute;
+
+  inset: 9px;
+
+  border: 1px solid rgba(20, 184, 166, 0.09);
+
+  border-radius: 50%;
+}
+
+.monitoring-current-emotion__orb > div {
+  position: absolute;
+
+  inset: -9px;
+
+  border: 1px solid rgba(192, 132, 252, 0.06);
+
+  border-radius: 50%;
+}
+
+.monitoring-current-emotion__orb span {
+  position: relative;
+  z-index: 2;
+
+  font-size: 2.3rem;
+}
+
+.monitoring-current-emotion__label {
+  color: #526074;
+
+  font-size: 0.51rem;
+  font-weight: 700;
+
+  letter-spacing: 0.13em;
+}
+
+.monitoring-current-emotion h3 {
+  margin: 0.35rem 0 1.2rem;
+
+  color: #e2e8f0;
+
+  font-size: 1.35rem;
+}
+
+.monitoring-confidence {
+  width: 100%;
+}
+
+.monitoring-confidence__header {
+  display: flex;
+  justify-content: space-between;
+
+  margin-bottom: 0.45rem;
+
+  color: #68768a;
+
+  font-size: 0.58rem;
+}
+
+.monitoring-confidence__header strong {
+  color: #14b8a6;
+}
+
+.monitoring-confidence__track {
+  height: 5px;
+
+  overflow: hidden;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  border-radius: 999px;
+}
+
+.monitoring-confidence__track span {
+  display: block;
+
+  height: 100%;
+
+  background: linear-gradient(
+    90deg,
+    #0d9488,
+    #14b8a6
+  );
+
+  border-radius: inherit;
+
+  transition: width 500ms ease;
+}
+
+.monitoring-emotion-stats {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 0.6rem;
+
+  margin-top: 1.2rem;
+}
+
+.monitoring-emotion-stats > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.2rem;
+
+  padding: 0.65rem;
+
+  background: rgba(255, 255, 255, 0.02);
+
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  border-radius: 0.6rem;
+}
+
+.monitoring-emotion-stats span {
+  color: #526074;
+
+  font-size: 0.54rem;
+}
+
+.monitoring-emotion-stats strong {
+  color: #a7b1c1;
+
+  font-size: 0.72rem;
+}
+
+/* ============================================================
+   SIGNALS
+   ============================================================ */
+
+.monitoring-section {
+  margin-bottom: 1.7rem;
+}
+
+.monitoring-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 0.9rem;
+}
+
+.monitoring-section-header > div:first-child > span {
+  color: #14b8a6;
+
+  font-size: 0.54rem;
+  font-weight: 700;
+
+  letter-spacing: 0.14em;
+}
+
+.monitoring-section-header h2 {
+  margin: 0.3rem 0 0.25rem;
+
+  color: #dbe3ed;
+
+  font-size: 1rem;
+}
+
+.monitoring-section-header p {
+  margin: 0;
+
+  color: #59687c;
+
+  font-size: 0.62rem;
+}
+
+.monitoring-signal-live {
+  display: flex;
+  align-items: center;
+
+  gap: 0.35rem;
+
+  color: #59687c;
+
+  font-size: 0.55rem;
+}
+
+.monitoring-signal-live span {
+  width: 5px;
+  height: 5px;
+
+  background: #14b8a6;
+
+  border-radius: 50%;
+}
+
+.monitoring-signals {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 0.7rem;
+}
+
+.monitoring-signal-card {
+  position: relative;
+
+  overflow: hidden;
+}
+
+.monitoring-signal-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  margin-bottom: 0.8rem;
+
+  color: #7f8ca0;
+
+  font-size: 0.7rem;
+}
+
+.monitoring-signal-card__emotion {
+  display: flex;
+  align-items: center;
+
+  gap: 0.5rem;
+}
+
+.monitoring-signal-card__emotion > span {
+  font-size: 1.1rem;
+}
+
+.monitoring-signal-card__emotion strong {
+  color: #cbd5e1;
+}
+
+.monitoring-signal-card__top > strong {
+  color: #14b8a6;
+}
+
+.monitoring-signal-card__track {
+  height: 4px;
+
+  overflow: hidden;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  border-radius: 999px;
+}
+
+.monitoring-signal-card__track span {
+  display: block;
+
+  height: 100%;
+
+  background: #14b8a6;
+
+  border-radius: inherit;
+
+  transition: width 800ms ease;
+}
+
+.monitoring-signal-card--lavender
+  .monitoring-signal-card__track
+  span {
+  background: #c084fc;
+}
+
+.monitoring-signal-card--coral
+  .monitoring-signal-card__track
+  span {
+  background: #fb7185;
+}
+
+.monitoring-signal-card small {
+  display: block;
+
+  margin-top: 0.55rem;
+
+  color: #4f5c70;
+
+  font-size: 0.53rem;
+}
+
+/* ============================================================
+   BOTTOM
+   ============================================================ */
+
+.monitoring-bottom-grid {
+  display: grid;
+
+  grid-template-columns: minmax(0, 1.5fr) minmax(250px, 0.7fr);
+
+  gap: 0.8rem;
+
+  margin-bottom: 2rem;
+}
+
+.monitoring-observation__header {
+  display: flex;
+  align-items: center;
+
+  gap: 0.7rem;
+}
+
+.monitoring-observation__icon {
+  width: 37px;
+  height: 37px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #c084fc;
+
+  background: rgba(192, 132, 252, 0.07);
+
+  border: 1px solid rgba(192, 132, 252, 0.12);
+
+  border-radius: 0.65rem;
+}
+
+.monitoring-observation__header span {
+  color: #c084fc;
+
+  font-size: 0.52rem;
+  font-weight: 700;
+
+  letter-spacing: 0.11em;
+}
+
+.monitoring-observation__header h2 {
+  margin: 0.3rem 0 0;
+
+  color: #dbe3ed;
+
+  font-size: 0.86rem;
+}
+
+.monitoring-observation > p {
+  margin: 1rem 0;
+
+  color: #718096;
+
+  font-size: 0.67rem;
+
+  line-height: 1.75;
+}
+
+.monitoring-observation__tags {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 0.4rem;
+}
+
+.monitoring-observation__tags span {
+  padding: 0.35rem 0.5rem;
+
+  color: #718096;
+
+  background: rgba(255, 255, 255, 0.025);
+
+  border: 1px solid rgba(255, 255, 255, 0.05);
+
+  border-radius: 999px;
+
+  font-size: 0.53rem;
+}
+
+.monitoring-observation__notice {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 0.4rem;
+
+  margin-top: 1rem;
+  padding-top: 0.8rem;
+
+  color: #526074;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+
+  font-size: 0.52rem;
+
+  line-height: 1.5;
+}
+
+.monitoring-observation__notice svg {
+  flex-shrink: 0;
+
+  color: #fb7185;
+}
+
+.monitoring-wellbeing__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: #14b8a6;
+
+  font-size: 0.54rem;
+  font-weight: 700;
+
+  letter-spacing: 0.11em;
+}
+
+.monitoring-wellbeing__score {
+  display: flex;
+  align-items: baseline;
+
+  margin-top: 1rem;
+}
+
+.monitoring-wellbeing__score strong {
+  color: #e2e8f0;
+
+  font-size: 2.3rem;
+
+  letter-spacing: -0.05em;
+}
+
+.monitoring-wellbeing__score span {
+  color: #526074;
+
+  font-size: 0.65rem;
+}
+
+.monitoring-wellbeing__meter {
+  height: 5px;
+
+  overflow: hidden;
+
+  margin-top: 0.8rem;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  border-radius: 999px;
+}
+
+.monitoring-wellbeing__meter span {
+  display: block;
+
+  width: 84%;
+  height: 100%;
+
+  background: linear-gradient(
+    90deg,
+    #0d9488,
+    #14b8a6
+  );
+
+  border-radius: inherit;
+}
+
+.monitoring-wellbeing > p {
+  margin: 0.7rem 0 1rem;
+
+  color: #718096;
+
+  font-size: 0.61rem;
+}
+
+.monitoring-wellbeing__legend {
+  display: flex;
+
+  gap: 0.8rem;
+
+  color: #526074;
+
+  font-size: 0.5rem;
+}
+
+.monitoring-wellbeing__legend span {
+  display: flex;
+  align-items: center;
+
+  gap: 0.25rem;
+}
+
+.monitoring-wellbeing__legend i {
+  width: 5px;
+  height: 5px;
+
+  display: block;
+
+  background: #14b8a6;
+
+  border-radius: 50%;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.monitoring-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  padding: 1.2rem 0;
+
+  color: #3f4b5d;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+
+  font-size: 0.53rem;
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes monitoring-status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+@keyframes monitoring-orb {
+  0%,
+  100% {
+    transform: scale(0.98);
+  }
+
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1100px) {
+  .monitoring-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .monitoring-camera {
+    height: 390px;
+  }
+
+  .monitoring-signals {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .monitoring-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .monitoring-sidebar {
+    position: static;
+
+    width: 70px;
+
+    padding: 1rem 0.7rem;
+  }
+
+  .monitoring-brand span:last-child,
+  .monitoring-nav__label,
+  .monitoring-sidebar__privacy,
+  .monitoring-sidebar__back {
+    display: none;
+  }
+
+  .monitoring-brand {
+    justify-content: center;
+  }
+
+  .monitoring-nav {
+    margin-top: 2rem;
+  }
+
+  .monitoring-nav__item {
+    justify-content: center;
+
+    padding: 0.7rem;
+  }
+
+  .monitoring-main {
+    width: calc(100% - 70px);
+
+    margin-left: 0;
+
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 650px) {
+  .monitoring-page {
+    display: block;
+  }
+
+  .monitoring-sidebar {
+    position: sticky;
+    top: 0;
+
+    width: 100%;
+    height: 58px;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    padding: 0 1rem;
+
+    border-right: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .monitoring-brand {
+    justify-content: flex-start;
+  }
+
+  .monitoring-nav {
+    flex-direction: row;
+
+    margin: 0 0 0 auto;
+  }
+
+  .monitoring-nav__item {
+    display: none;
+  }
+
+  .monitoring-nav__item:nth-of-type(1),
+  .monitoring-nav__item:nth-of-type(2),
+  .monitoring-nav__item:nth-of-type(3) {
+    display: flex;
+  }
+
+  .monitoring-main {
+    width: 100%;
+
+    padding: 1.2rem 1rem;
+  }
+
+  .monitoring-header {
+    align-items: flex-start;
+  }
+
+  .monitoring-header__status {
+    flex-shrink: 0;
+  }
+
+  .monitoring-header__status > span:nth-child(2) {
+    display: none;
+  }
+
+  .monitoring-session-bar {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .monitoring-session-tags {
+    width: 100%;
+  }
+
+  .monitoring-camera {
+    height: 300px;
+  }
+
+  .monitoring-signals {
+    grid-template-columns: 1fr;
+  }
+
+  .monitoring-section-header {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+
+  .monitoring-footer {
+    align-items: flex-start;
+
+    flex-direction: column;
+  }
+}

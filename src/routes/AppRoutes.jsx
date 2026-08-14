@@ -3,6 +3,7 @@ import Landing from "../pages/Landing/Landing";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import Dashboard from "../pages/Dashboard/Dashboard";
+import Monitoring from "../pages/Monitoring/Monitoring";
 
 function PlaceholderPage({ title }) {
   return (
@@ -32,10 +33,7 @@ function AppRoutes() {
 
       <Route path="/dashboard" element={<Dashboard />} />
 
-      <Route
-        path="/monitoring"
-        element={<PlaceholderPage title="Real-time Monitoring" />}
-      />
+      <Route path="/monitoring" element={<Monitoring />} />
 
       <Route
         path="/history"
