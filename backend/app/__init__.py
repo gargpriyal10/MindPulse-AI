@@ -3,6 +3,7 @@ from flask_cors import CORS
 
 from config import Config
 from app.database import db, migrate, jwt
+from app.routes.user_routes import user_bp
 
 
 def create_app():
@@ -27,5 +28,6 @@ def create_app():
     from app.routes import auth_bp
 
     app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp)
 
     return app
