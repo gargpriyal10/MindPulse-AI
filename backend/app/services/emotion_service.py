@@ -1,5 +1,7 @@
 import os
 from werkzeug.utils import secure_filename
+import cv2
+import mediapipe as mp
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
 
@@ -30,3 +32,30 @@ def save_uploaded_image(file):
     file.save(filepath)
 
     return True, "Image uploaded successfully.", filename
+
+mp_face_detection = mp.solutions.face_detection
+
+
+def detect_face(image_path):
+    """
+    Detect whether the uploaded image contains a face.
+    """
+
+    image = cv2.imread(image_path)
+
+    if image is None:
+        return False, "Unable to read image."
+
+    rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+    with mp_face_detection.FaceDetection(
+        model_selection=0,
+        min_detection_confidence=0.5
+    ) as face_detection:
+
+        results = face_detection.process(rgb_image)
+
+        if not results.detections:
+            return False, "No face detected."
+
+    return True, "Face detected successfully."
