@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import Landing from "../pages/Landing/Landing";
 import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
+import Dashboard from "../pages/Dashboard/Dashboard";
 
 function PlaceholderPage({ title }) {
   return (
@@ -29,10 +30,7 @@ function AppRoutes() {
 
       <Route path="/register" element={<Register />} />
 
-      <Route
-        path="/dashboard"
-        element={<PlaceholderPage title="Dashboard" />}
-      />
+      <Route path="/dashboard" element={<Dashboard />} />
 
       <Route
         path="/monitoring"
