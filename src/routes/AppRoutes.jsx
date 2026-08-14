@@ -1,0 +1,76 @@
+import { Routes, Route } from "react-router-dom";
+
+function PlaceholderPage({ title }) {
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "grid",
+        placeItems: "center",
+        background: "#080E14",
+        color: "#F8FAFC",
+        fontFamily: "inherit",
+      }}
+    >
+      <h1>{title}</h1>
+    </div>
+  );
+}
+
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={<PlaceholderPage title="MindPulse AI — Landing" />}
+      />
+
+      <Route
+        path="/login"
+        element={<PlaceholderPage title="Login" />}
+      />
+
+      <Route
+        path="/register"
+        element={<PlaceholderPage title="Register" />}
+      />
+
+      <Route
+        path="/dashboard"
+        element={<PlaceholderPage title="Dashboard" />}
+      />
+
+      <Route
+        path="/monitoring"
+        element={<PlaceholderPage title="Real-time Monitoring" />}
+      />
+
+      <Route
+        path="/history"
+        element={<PlaceholderPage title="Session History" />}
+      />
+
+      <Route
+        path="/reports"
+        element={<PlaceholderPage title="Reports & Analytics" />}
+      />
+
+      <Route
+        path="/profile"
+        element={<PlaceholderPage title="User Profile" />}
+      />
+
+      <Route
+        path="/settings"
+        element={<PlaceholderPage title="Settings" />}
+      />
+
+      <Route
+        path="*"
+        element={<PlaceholderPage title="404 — Page Not Found" />}
+      />
+    </Routes>
+  );
+}
+
+export default AppRoutes;
