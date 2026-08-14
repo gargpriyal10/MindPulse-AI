@@ -4,6 +4,7 @@ from flask_cors import CORS
 from config import Config
 from app.database import db, migrate, jwt
 from app.routes.user_routes import user_bp
+from app.routes.emotion_routes import emotion_bp
 
 
 def create_app():
@@ -29,5 +30,6 @@ def create_app():
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
+    app.register_blueprint(emotion_bp)
 
     return app
