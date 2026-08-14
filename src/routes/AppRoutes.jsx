@@ -1,4 +1,5 @@
 import { Routes, Route } from "react-router-dom";
+import Landing from "../pages/Landing/Landing";
 
 function PlaceholderPage({ title }) {
   return (
@@ -20,10 +21,7 @@ function PlaceholderPage({ title }) {
 function AppRoutes() {
   return (
     <Routes>
-      <Route
-        path="/"
-        element={<PlaceholderPage title="MindPulse AI — Landing" />}
-      />
+      <Route path="/" element={<Landing />} />
 
       <Route
         path="/login"
