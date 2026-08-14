@@ -26,3 +26,16 @@ def validate_register_data(data):
         )
 
     return True, None
+
+def validate_login_data(data):
+
+    required_fields = [
+        "email",
+        "password"
+    ]
+
+    for field in required_fields:
+        if field not in data or not str(data[field]).strip():
+            return False, f"{field} is required"
+
+    return True, None

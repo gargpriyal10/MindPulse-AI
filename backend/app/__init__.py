@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from config import Config
-from app.database import db, migrate
+from app.database import db, migrate, jwt
 
 
 def create_app():
@@ -14,6 +14,7 @@ def create_app():
 
     db.init_app(app)
     migrate.init_app(app, db)
+    jwt.init_app(app)
     from app.models import User
 
     @app.route("/api/health", methods=["GET"])
