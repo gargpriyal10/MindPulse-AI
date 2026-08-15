@@ -1,0 +1,489 @@
+import { useState } from "react";
+import {
+    Activity,
+    Bell,
+    CalendarDays,
+    CheckCircle2,
+    Clock3,
+    Edit3,
+    HeartPulse,
+    LockKeyhole,
+    Mail,
+    MapPin,
+    ShieldCheck,
+    Sparkles,
+    User,
+} from "lucide-react";
+
+import Card from "../../components/ui/Card";
+
+import "./Profile.css";
+
+function Profile() {
+    const [editing, setEditing] = useState(false);
+
+    const [profile, setProfile] = useState({
+        name: "Priyal Garg",
+        email: "priyal@example.com",
+        location: "India",
+        timezone: "IST (UTC +5:30)",
+    });
+
+    const handleChange = (event) => {
+        const { name, value } = event.target;
+
+        setProfile((current) => ({
+            ...current,
+            [name]: value,
+        }));
+    };
+
+    return (
+        <main className="profile-page">
+            {/* SIDEBAR */}
+
+            <aside className="profile-sidebar">
+                <a href="/dashboard" className="profile-brand">
+                    <span className="profile-brand__icon">
+                        <HeartPulse size={20} />
+                    </span>
+
+                    <span>
+                        MindPulse <strong>AI</strong>
+                    </span>
+                </a>
+
+                <nav className="profile-nav">
+                    <span className="profile-nav__label">
+                        WORKSPACE
+                    </span>
+
+                    <a href="/dashboard" className="profile-nav__item">
+                        <Activity size={17} />
+                        Overview
+                    </a>
+
+                    <a href="/monitoring" className="profile-nav__item">
+                        <HeartPulse size={17} />
+                        Monitoring
+                    </a>
+
+                    <a href="/history" className="profile-nav__item">
+                        <Clock3 size={17} />
+                        History
+                    </a>
+
+                    <a href="/reports" className="profile-nav__item">
+                        <Activity size={17} />
+                        Reports
+                    </a>
+
+                    <span className="profile-nav__label profile-nav__label--second">
+                        ACCOUNT
+                    </span>
+
+                    <a
+                        href="/profile"
+                        className="profile-nav__item profile-nav__item--active"
+                    >
+                        <User size={17} />
+                        Profile
+                    </a>
+
+                    <a href="/settings" className="profile-nav__item">
+                        <ShieldCheck size={17} />
+                        Settings
+                    </a>
+                </nav>
+
+                <div className="profile-sidebar__bottom">
+                    <div className="profile-privacy-tip">
+                        <LockKeyhole size={15} />
+
+                        <span>
+                            Your personal information is protected
+                            with privacy-first controls.
+                        </span>
+                    </div>
+                </div>
+            </aside>
+
+            {/* MAIN */}
+
+            <section className="profile-main">
+                <header className="profile-header">
+                    <div>
+                        <span className="profile-header__eyebrow">
+                            ACCOUNT
+                        </span>
+
+                        <h1>Profile</h1>
+
+                        <p>
+                            Manage your personal information and
+                            MindPulse account.
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        className={
+                            editing
+                                ? "profile-save-button"
+                                : "profile-edit-button"
+                        }
+                        onClick={() => setEditing((value) => !value)}
+                    >
+                        {editing ? (
+                            <>
+                                <CheckCircle2 size={14} />
+                                Save changes
+                            </>
+                        ) : (
+                            <>
+                                <Edit3 size={14} />
+                                Edit profile
+                            </>
+                        )}
+                    </button>
+                </header>
+
+                {/* PROFILE HERO */}
+
+                <Card className="profile-hero" padding="medium">
+                    <div className="profile-avatar">
+                        <span>PG</span>
+
+                        <i>
+                            <CheckCircle2 size={11} />
+                        </i>
+                    </div>
+
+                    <div className="profile-identity">
+                        <div className="profile-name-row">
+                            <h2>{profile.name}</h2>
+
+                            <span className="profile-active-badge">
+                                <i />
+                                Active
+                            </span>
+                        </div>
+
+                        <p>
+                            <Mail size={13} />
+                            {profile.email}
+                        </p>
+
+                        <div className="profile-meta">
+                            <span>
+                                <CalendarDays size={12} />
+                                Member since August 2026
+                            </span>
+
+                            <span>
+                                <MapPin size={12} />
+                                {profile.location}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className="profile-member-card">
+                        <Sparkles size={15} />
+
+                        <div>
+                            <span>MEMBERSHIP</span>
+
+                            <strong>MindPulse Member</strong>
+                        </div>
+                    </div>
+                </Card>
+
+                {/* INFORMATION + STATS */}
+
+                <section className="profile-content-grid">
+                    <Card
+                        className="profile-info-card"
+                        padding="medium"
+                    >
+                        <div className="profile-card-heading">
+                            <div>
+                                <span>PERSONAL INFORMATION</span>
+
+                                <h2>Your details</h2>
+                            </div>
+
+                            <User size={17} />
+                        </div>
+
+                        <div className="profile-form">
+                            <label>
+                                <span>Full name</span>
+
+                                <div>
+                                    <User size={14} />
+
+                                    <input
+                                        name="name"
+                                        value={profile.name}
+                                        onChange={handleChange}
+                                        disabled={!editing}
+                                    />
+                                </div>
+                            </label>
+
+                            <label>
+                                <span>Email address</span>
+
+                                <div>
+                                    <Mail size={14} />
+
+                                    <input
+                                        name="email"
+                                        type="email"
+                                        value={profile.email}
+                                        onChange={handleChange}
+                                        disabled={!editing}
+                                    />
+                                </div>
+                            </label>
+
+                            <label>
+                                <span>Location</span>
+
+                                <div>
+                                    <MapPin size={14} />
+
+                                    <input
+                                        name="location"
+                                        value={profile.location}
+                                        onChange={handleChange}
+                                        disabled={!editing}
+                                    />
+                                </div>
+                            </label>
+
+                            <label>
+                                <span>Timezone</span>
+
+                                <div>
+                                    <Clock3 size={14} />
+
+                                    <input
+                                        name="timezone"
+                                        value={profile.timezone}
+                                        onChange={handleChange}
+                                        disabled={!editing}
+                                    />
+                                </div>
+                            </label>
+                        </div>
+                    </Card>
+
+                    <Card
+                        className="profile-stats-card"
+                        padding="medium"
+                    >
+                        <div className="profile-card-heading">
+                            <div>
+                                <span>EMOTIONAL OVERVIEW</span>
+
+                                <h2>Your journey</h2>
+                            </div>
+
+                            <HeartPulse size={17} />
+                        </div>
+
+                        <div className="profile-stat-list">
+                            <div className="profile-stat">
+                                <div className="profile-stat__icon">
+                                    <HeartPulse size={16} />
+                                </div>
+
+                                <div>
+                                    <strong>84</strong>
+                                    <span>Well-being score</span>
+                                </div>
+
+                                <small>+6.2%</small>
+                            </div>
+
+                            <div className="profile-stat">
+                                <div className="profile-stat__icon">
+                                    <Activity size={16} />
+                                </div>
+
+                                <div>
+                                    <strong>28</strong>
+                                    <span>Total sessions</span>
+                                </div>
+
+                                <small>Active</small>
+                            </div>
+
+                            <div className="profile-stat">
+                                <div className="profile-stat__icon">
+                                    <ShieldCheck size={16} />
+                                </div>
+
+                                <div>
+                                    <strong>93%</strong>
+                                    <span>AI confidence</span>
+                                </div>
+
+                                <small>Excellent</small>
+                            </div>
+
+                            <div className="profile-stat">
+                                <div className="profile-stat__icon">
+                                    <Clock3 size={16} />
+                                </div>
+
+                                <div>
+                                    <strong>8.4h</strong>
+                                    <span>Monitoring time</span>
+                                </div>
+
+                                <small>Total</small>
+                            </div>
+                        </div>
+                    </Card>
+                </section>
+
+                {/* ACTIVITY */}
+
+                <section className="profile-lower-grid">
+                    <Card
+                        className="profile-activity-card"
+                        padding="medium"
+                    >
+                        <div className="profile-card-heading">
+                            <div>
+                                <span>RECENT ACTIVITY</span>
+
+                                <h2>Latest account activity</h2>
+                            </div>
+
+                            <Bell size={17} />
+                        </div>
+
+                        <div className="profile-activity-list">
+                            <div className="profile-activity">
+                                <div className="profile-activity__icon">
+                                    <HeartPulse size={14} />
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        Completed monitoring session
+                                    </strong>
+
+                                    <span>
+                                        Well-being score: 84
+                                    </span>
+                                </div>
+
+                                <small>Today</small>
+                            </div>
+
+                            <div className="profile-activity">
+                                <div className="profile-activity__icon">
+                                    <BarChartIcon />
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        Viewed emotional report
+                                    </strong>
+
+                                    <span>
+                                        Weekly analytics
+                                    </span>
+                                </div>
+
+                                <small>Yesterday</small>
+                            </div>
+
+                            <div className="profile-activity">
+                                <div className="profile-activity__icon">
+                                    <ShieldCheck size={14} />
+                                </div>
+
+                                <div>
+                                    <strong>
+                                        Privacy settings reviewed
+                                    </strong>
+
+                                    <span>
+                                        Account security
+                                    </span>
+                                </div>
+
+                                <small>2 days ago</small>
+                            </div>
+                        </div>
+                    </Card>
+
+                    <Card
+                        className="profile-security-card"
+                        padding="medium"
+                    >
+                        <div className="profile-security-icon">
+                            <ShieldCheck size={19} />
+                        </div>
+
+                        <span>PRIVACY & SECURITY</span>
+
+                        <h2>
+                            Your data belongs to you.
+                        </h2>
+
+                        <p>
+                            MindPulse is designed with a
+                            privacy-first approach. Your emotional
+                            insights and account information should
+                            remain protected and under your control.
+                        </p>
+
+                        <a href="/settings">
+                            Manage security
+                            <Edit3 size={13} />
+                        </a>
+                    </Card>
+                </section>
+
+                <footer className="profile-footer">
+                    <span>
+                        MindPulse AI • Personal account
+                    </span>
+
+                    <span>
+                        Privacy-first • Human-centric
+                    </span>
+                </footer>
+            </section>
+        </main>
+    );
+}
+
+function BarChartIcon() {
+    return (
+        <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+        >
+            <path d="M4 19V5" />
+            <path d="M4 19h16" />
+            <path d="M8 16v-5" />
+            <path d="M12 16V7" />
+            <path d="M16 16v-8" />
+        </svg>
+    );
+}
+
+export default Profile;

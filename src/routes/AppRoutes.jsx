@@ -6,6 +6,7 @@ import Dashboard from "../pages/Dashboard/Dashboard";
 import Monitoring from "../pages/Monitoring/Monitoring";
 import History from "../pages/History/History";
 import Reports from "../pages/Reports/Reports";
+import Profile from "../pages/Profile/Profile";
 
 function PlaceholderPage({ title }) {
   return (
@@ -41,10 +42,7 @@ function AppRoutes() {
 
       <Route path="/reports" element={<Reports />} />
 
-      <Route
-        path="/profile"
-        element={<PlaceholderPage title="User Profile" />}
-      />
+      <Route path="/profile" element={<Profile />} />
 
       <Route
         path="/settings"
