@@ -4,6 +4,7 @@ import Login from "../pages/Login/Login";
 import Register from "../pages/Register/Register";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Monitoring from "../pages/Monitoring/Monitoring";
+import History from "../pages/History/History";
 
 function PlaceholderPage({ title }) {
   return (
@@ -35,10 +36,7 @@ function AppRoutes() {
 
       <Route path="/monitoring" element={<Monitoring />} />
 
-      <Route
-        path="/history"
-        element={<PlaceholderPage title="Session History" />}
-      />
+      <Route path="/history" element={<History />} />
 
       <Route
         path="/reports"
