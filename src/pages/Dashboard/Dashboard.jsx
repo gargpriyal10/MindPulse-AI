@@ -19,88 +19,62 @@ import EmotionCard from "../../components/domain/EmotionCard";
 import SessionCard from "../../components/domain/SessionCard";
 import ChartContainer from "../../components/domain/ChartContainer";
 
+import {
+  dashboardOverview,
+  recentEmotions,
+  sessionHistory,
+  dailyWellbeing,
+  wellbeingInsights,
+} from "../../services/mockData";
+
 import "./Dashboard.css";
 
 function Dashboard() {
-  const emotionData = [
-    {
-      emotion: "Happy",
-      intensity: 84,
-      confidence: 95,
-      trend: 12,
-    },
-    {
-      emotion: "Calm",
-      intensity: 76,
-      confidence: 93,
-      trend: 8,
-    },
-    {
-      emotion: "Neutral",
-      intensity: 52,
-      confidence: 89,
-      trend: 2,
-    },
-    {
-      emotion: "Anxious",
-      intensity: 31,
-      confidence: 86,
-      trend: -7,
-    },
-  ];
+  /* ============================================================
+     DASHBOARD DATA
+  ============================================================ */
 
-  const sessions = [
-    {
-      id: 1,
-      date: "Aug 15, 2026",
-      startTime: "10:30 AM",
-      duration: 18,
-      dominantEmotion: "Calm",
-      wellbeingScore: 82,
-      confidence: 94,
-      status: "Completed",
-    },
-    {
-      id: 2,
-      date: "Aug 14, 2026",
-      startTime: "06:15 PM",
-      duration: 24,
-      dominantEmotion: "Happy",
-      wellbeingScore: 89,
-      confidence: 96,
-      status: "Completed",
-    },
-    {
-      id: 3,
-      date: "Aug 13, 2026",
-      startTime: "09:45 AM",
-      duration: 15,
-      dominantEmotion: "Neutral",
-      wellbeingScore: 74,
-      confidence: 90,
-      status: "Completed",
-    },
-  ];
+  const emotionData = recentEmotions
+    .slice(0, 4)
+    .map((item) => ({
+      emotion: item.emotion,
+      intensity: item.intensity,
+      confidence: item.confidence,
+      trend: 0,
+    }));
 
-  const trendData = [
-    62,
-    67,
-    65,
-    72,
-    70,
-    78,
-    75,
-    82,
-    79,
-    86,
-    83,
-    89,
-  ];
+  const sessions = sessionHistory
+    .slice(0, 3)
+    .map((session) => ({
+      id: session.id,
+
+      date: new Date(session.date).toLocaleDateString(
+        "en-US",
+        {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }
+      ),
+
+      startTime: session.startTime,
+      duration: session.duration,
+      dominantEmotion: session.dominantEmotion,
+      wellbeingScore: session.wellbeingScore,
+      confidence: session.confidence,
+      status: session.status,
+    }));
+
+  const trendData = dailyWellbeing.map(
+    (item) => item.score
+  );
 
   const chartPoints = trendData
     .map((value, index) => {
       const x =
-        (index / (trendData.length - 1)) * 100;
+        trendData.length === 1
+          ? 50
+          : (index / (trendData.length - 1)) * 100;
 
       const y = 100 - value;
 
@@ -108,13 +82,22 @@ function Dashboard() {
     })
     .join(" ");
 
+  const latestInsight =
+    wellbeingInsights[0];
+
+  /* ============================================================
+     RENDER
+  ============================================================ */
+
   return (
     <main className="dashboard-page">
+
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
 
       <aside className="dashboard-sidebar">
+
         <a href="/" className="dashboard-brand">
           <span className="dashboard-brand__icon">
             <Brain size={20} />
@@ -126,6 +109,7 @@ function Dashboard() {
         </a>
 
         <nav className="dashboard-nav">
+
           <span className="dashboard-nav__label">
             WORKSPACE
           </span>
@@ -181,19 +165,23 @@ function Dashboard() {
             <ShieldCheck size={17} />
             Settings
           </a>
+
         </nav>
 
         <div className="dashboard-sidebar__bottom">
+
           <div className="dashboard-sidebar__tip">
+
             <Sparkles size={16} />
 
             <div>
               <strong>Daily insight</strong>
 
               <p>
-                Your calm moments increased this week.
+                {latestInsight.description}
               </p>
             </div>
+
           </div>
 
           <a
@@ -202,7 +190,9 @@ function Dashboard() {
           >
             ← Back to home
           </a>
+
         </div>
+
       </aside>
 
       {/* =====================================================
@@ -210,10 +200,15 @@ function Dashboard() {
       ===================================================== */}
 
       <section className="dashboard-main">
-        {/* Header */}
+
+        {/* =================================================
+            HEADER
+        ================================================= */}
 
         <header className="dashboard-header">
+
           <div>
+
             <span className="dashboard-header__eyebrow">
               YOUR WELL-BEING SPACE
             </span>
@@ -224,26 +219,29 @@ function Dashboard() {
             </h1>
 
             <p>
-              Here's a look at your emotional well-being
-              today.
+              Here's a look at your emotional
+              well-being today.
             </p>
+
           </div>
 
           <div className="dashboard-header__actions">
+
             <button
               type="button"
               className="dashboard-notification"
               aria-label="Notifications"
             >
               <Bell size={18} />
-
               <span />
             </button>
 
             <div className="dashboard-avatar">
               PG
             </div>
+
           </div>
+
         </header>
 
         {/* =================================================
@@ -251,7 +249,9 @@ function Dashboard() {
         ================================================= */}
 
         <section className="dashboard-quick-start">
+
           <div className="dashboard-quick-start__content">
+
             <div className="dashboard-quick-start__badge">
               <span />
               READY WHEN YOU ARE
@@ -262,22 +262,27 @@ function Dashboard() {
             </h2>
 
             <p>
-              Start a new monitoring session and discover
-              what your emotions are telling you today.
+              Start a new monitoring session and
+              discover what your emotions are
+              telling you today.
             </p>
 
             <Button
               icon={<ArrowRight size={17} />}
               onClick={() => {
-                window.location.href = "/monitoring";
+                window.location.href =
+                  "/monitoring";
               }}
             >
               Start Monitoring
             </Button>
+
           </div>
 
           <div className="dashboard-quick-start__visual">
+
             <div className="dashboard-pulse-ring dashboard-pulse-ring--one" />
+
             <div className="dashboard-pulse-ring dashboard-pulse-ring--two" />
 
             <div className="dashboard-pulse-core">
@@ -291,7 +296,9 @@ function Dashboard() {
             <div className="dashboard-floating-emotion dashboard-floating-emotion--two">
               😌
             </div>
+
           </div>
+
         </section>
 
         {/* =================================================
@@ -299,27 +306,39 @@ function Dashboard() {
         ================================================= */}
 
         <section className="dashboard-metrics">
+
+          {/* WELL-BEING */}
+
           <Card
             className="dashboard-metric-card"
             padding="medium"
           >
+
             <div className="dashboard-metric__icon dashboard-metric__icon--teal">
               <HeartPulse size={18} />
             </div>
 
             <div>
+
               <span>Well-being score</span>
 
-              <strong>84</strong>
+              <strong>
+                {dashboardOverview.wellbeingScore}
+              </strong>
 
               <small>
                 <TrendingUp size={12} />
-                +6.4% this week
+
+                +{dashboardOverview.wellbeingChange}%
+                this week
               </small>
+
             </div>
 
             <div className="dashboard-metric__ring">
+
               <svg viewBox="0 0 42 42">
+
                 <circle
                   cx="21"
                   cy="21"
@@ -337,72 +356,104 @@ function Dashboard() {
                   stroke="#14B8A6"
                   strokeWidth="4"
                   strokeLinecap="round"
-                  strokeDasharray="84 100"
+                  strokeDasharray={`${dashboardOverview.wellbeingScore} 100`}
                   transform="rotate(-90 21 21)"
                 />
+
               </svg>
 
-              <span>84%</span>
+              <span>
+                {dashboardOverview.wellbeingScore}%
+              </span>
+
             </div>
+
           </Card>
+
+          {/* TOTAL SESSIONS */}
 
           <Card
             className="dashboard-metric-card"
             padding="medium"
           >
+
             <div className="dashboard-metric__icon dashboard-metric__icon--lavender">
               <CalendarDays size={18} />
             </div>
 
             <div>
+
               <span>Total sessions</span>
 
-              <strong>28</strong>
+              <strong>
+                {dashboardOverview.totalSessions}
+              </strong>
 
               <small>
                 <TrendingUp size={12} />
-                +4 this month
+                {dashboardOverview.sessionsThisWeek}
+                {" "}this week
               </small>
+
             </div>
+
           </Card>
+
+          {/* DOMINANT EMOTION */}
 
           <Card
             className="dashboard-metric-card"
             padding="medium"
           >
+
             <div className="dashboard-metric__icon dashboard-metric__icon--coral">
-              😊
+              {dashboardOverview.dominantEmotion.emoji}
             </div>
 
             <div>
+
               <span>Dominant emotion</span>
 
-              <strong>Calm</strong>
+              <strong>
+                {dashboardOverview.dominantEmotion.name}
+              </strong>
 
               <small>
-                38% of tracked sessions
+                Intensity{" "}
+                {dashboardOverview.dominantEmotion.intensity}%
               </small>
+
             </div>
+
           </Card>
+
+          {/* CONFIDENCE */}
 
           <Card
             className="dashboard-metric-card"
             padding="medium"
           >
+
             <div className="dashboard-metric__icon dashboard-metric__icon--blue">
               <ShieldCheck size={18} />
             </div>
 
             <div>
+
               <span>Avg. confidence</span>
 
-              <strong>93%</strong>
+              <strong>
+                {recentEmotions[0]?.confidence ?? 0}%
+              </strong>
 
               <small>
                 Consistent detection quality
               </small>
+
             </div>
+
           </Card>
+
         </section>
 
         {/* =================================================
@@ -410,26 +461,34 @@ function Dashboard() {
         ================================================= */}
 
         <section className="dashboard-section">
+
           <div className="dashboard-section__header">
+
             <div>
+
               <span className="dashboard-section__kicker">
                 EMOTIONAL SNAPSHOT
               </span>
 
-              <h2>How you've been feeling</h2>
+              <h2>
+                How you've been feeling
+              </h2>
 
               <p>
                 Your most recent emotional patterns.
               </p>
+
             </div>
 
             <a href="/reports">
               View reports
               <ChevronRight size={15} />
             </a>
+
           </div>
 
           <div className="dashboard-emotions">
+
             {emotionData.map((item) => (
               <EmotionCard
                 key={item.emotion}
@@ -437,7 +496,9 @@ function Dashboard() {
                 compact
               />
             ))}
+
           </div>
+
         </section>
 
         {/* =================================================
@@ -445,12 +506,15 @@ function Dashboard() {
         ================================================= */}
 
         <section className="dashboard-analysis">
+
           <ChartContainer
             title="Well-being trend"
-            subtitle="Your score across the last 12 check-ins"
+            subtitle="Your score across recent check-ins"
             height={300}
           >
+
             <div className="dashboard-chart">
+
               <div className="dashboard-chart__y-axis">
                 <span>100</span>
                 <span>75</span>
@@ -460,6 +524,7 @@ function Dashboard() {
               </div>
 
               <div className="dashboard-chart__area">
+
                 <div className="dashboard-chart__grid">
                   <span />
                   <span />
@@ -473,7 +538,9 @@ function Dashboard() {
                   preserveAspectRatio="none"
                   className="dashboard-chart__svg"
                 >
+
                   <defs>
+
                     <linearGradient
                       id="wellbeingGradient"
                       x1="0"
@@ -481,6 +548,7 @@ function Dashboard() {
                       x2="0"
                       y2="1"
                     >
+
                       <stop
                         offset="0%"
                         stopColor="#14B8A6"
@@ -492,7 +560,9 @@ function Dashboard() {
                         stopColor="#14B8A6"
                         stopOpacity="0"
                       />
+
                     </linearGradient>
+
                   </defs>
 
                   <polygon
@@ -508,79 +578,101 @@ function Dashboard() {
                     vectorEffect="non-scaling-stroke"
                   />
 
-                  {trendData.map((value, index) => {
-                    const x =
-                      (index /
-                        (trendData.length - 1)) *
-                      100;
+                  {dailyWellbeing.map(
+                    (item, index) => {
 
-                    const y = 100 - value;
+                      const x =
+                        dailyWellbeing.length === 1
+                          ? 50
+                          : (index /
+                            (dailyWellbeing.length -
+                              1)) *
+                          100;
 
-                    return (
-                      <circle
-                        key={`${value}-${index}`}
-                        cx={x}
-                        cy={y}
-                        r="1.5"
-                        fill="#0F172A"
-                        stroke="#14B8A6"
-                        strokeWidth="1"
-                        vectorEffect="non-scaling-stroke"
-                      />
-                    );
-                  })}
+                      const y =
+                        100 - item.score;
+
+                      return (
+                        <circle
+                          key={`${item.date}-${index}`}
+                          cx={x}
+                          cy={y}
+                          r="1.5"
+                          fill="#0F172A"
+                          stroke="#14B8A6"
+                          strokeWidth="1"
+                          vectorEffect="non-scaling-stroke"
+                        />
+                      );
+                    }
+                  )}
+
                 </svg>
 
                 <div className="dashboard-chart__x-axis">
-                  <span>Aug 4</span>
-                  <span>Aug 6</span>
-                  <span>Aug 8</span>
-                  <span>Aug 10</span>
-                  <span>Aug 12</span>
-                  <span>Aug 15</span>
+
+                  {dailyWellbeing.map((item) => (
+                    <span key={item.date}>
+                      {item.label}
+                    </span>
+                  ))}
+
                 </div>
+
               </div>
+
             </div>
+
           </ChartContainer>
+
+          {/* AI INSIGHT */}
 
           <Card
             className="dashboard-insight"
             padding="medium"
           >
+
             <div className="dashboard-insight__top">
+
               <div className="dashboard-insight__icon">
                 <Sparkles size={18} />
               </div>
 
-              <span>AI WELL-BEING INSIGHT</span>
+              <span>
+                AI WELL-BEING INSIGHT
+              </span>
+
             </div>
 
             <h3>
-              You're trending toward a more balanced week.
+              {latestInsight.title}
             </h3>
 
             <p>
-              Your calm and positive emotional states have
-              appeared more frequently over your last few
-              sessions. Your overall well-being score is
-              also up by 6.4%.
+              {latestInsight.description}
             </p>
 
             <div className="dashboard-insight__stat">
+
               <TrendingUp size={16} />
 
-              <strong>+6.4%</strong>
+              <strong>
+                {latestInsight.metric}
+              </strong>
 
               <span>
-                well-being improvement
+                well-being insight
               </span>
+
             </div>
 
             <a href="/reports">
               Explore your insights
               <ArrowRight size={15} />
             </a>
+
           </Card>
+
         </section>
 
         {/* =================================================
@@ -588,26 +680,34 @@ function Dashboard() {
         ================================================= */}
 
         <section className="dashboard-section dashboard-recent">
+
           <div className="dashboard-section__header">
+
             <div>
+
               <span className="dashboard-section__kicker">
                 RECENT ACTIVITY
               </span>
 
-              <h2>Recent sessions</h2>
+              <h2>
+                Recent sessions
+              </h2>
 
               <p>
                 Your latest emotional check-ins.
               </p>
+
             </div>
 
             <a href="/history">
               View all
               <ChevronRight size={15} />
             </a>
+
           </div>
 
           <div className="dashboard-sessions">
+
             {sessions.map((session) => (
               <SessionCard
                 key={session.id}
@@ -615,7 +715,9 @@ function Dashboard() {
                 compact
               />
             ))}
+
           </div>
+
         </section>
 
         {/* =================================================
@@ -623,6 +725,7 @@ function Dashboard() {
         ================================================= */}
 
         <footer className="dashboard-footer">
+
           <span>
             MindPulse AI • Emotion Recognition &
             Well-being Monitoring
@@ -631,8 +734,11 @@ function Dashboard() {
           <span>
             Privacy-first • Human-centric • 2026
           </span>
+
         </footer>
+
       </section>
+
     </main>
   );
 }
