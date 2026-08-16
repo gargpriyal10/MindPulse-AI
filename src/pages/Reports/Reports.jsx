@@ -1,18 +1,17 @@
 import { useMemo, useState } from "react";
 import {
     Activity,
-    BarChart3,
+    ArrowDownRight,
+    ArrowUpRight,
     Brain,
     CalendarDays,
-    CheckCircle2,
     ChevronDown,
     Clock3,
     Download,
     HeartPulse,
-    Lightbulb,
+    Info,
     ShieldCheck,
     Sparkles,
-    TrendingDown,
     TrendingUp,
 } from "lucide-react";
 
@@ -20,91 +19,272 @@ import Card from "../../components/ui/Card";
 
 import "./Reports.css";
 
-const weeklyData = [
-    { day: "Mon", score: 76, calm: 72, stress: 31 },
-    { day: "Tue", score: 81, calm: 78, stress: 25 },
-    { day: "Wed", score: 79, calm: 75, stress: 28 },
-    { day: "Thu", score: 87, calm: 84, stress: 18 },
-    { day: "Fri", score: 91, calm: 88, stress: 14 },
-    { day: "Sat", score: 86, calm: 82, stress: 20 },
-    { day: "Sun", score: 84, calm: 80, stress: 22 },
-];
+const reportData = {
+    "This week": {
+        summary: {
+            wellbeing: 84,
+            sessions: 28,
+            confidence: 93,
+            duration: 18,
+        },
 
-const emotionData = [
-    {
-        name: "Calm",
-        value: 42,
-        emoji: "😌",
-        type: "teal",
-    },
-    {
-        name: "Happy",
-        value: 28,
-        emoji: "😊",
-        type: "purple",
-    },
-    {
-        name: "Neutral",
-        value: 18,
-        emoji: "😐",
-        type: "blue",
-    },
-    {
-        name: "Anxious",
-        value: 7,
-        emoji: "😟",
-        type: "coral",
-    },
-    {
-        name: "Stressed",
-        value: 5,
-        emoji: "😣",
-        type: "red",
-    },
-];
+        weekly: [
+            { label: "Mon", score: 76 },
+            { label: "Tue", score: 81 },
+            { label: "Wed", score: 79 },
+            { label: "Thu", score: 87 },
+            { label: "Fri", score: 91 },
+            { label: "Sat", score: 86 },
+            { label: "Sun", score: 84 },
+        ],
 
-const monthlyScores = [
-    { month: "May", score: 72 },
-    { month: "Jun", score: 77 },
-    { month: "Jul", score: 81 },
-    { month: "Aug", score: 84 },
-];
+        emotions: [
+            {
+                name: "Calm",
+                value: 42,
+                type: "teal",
+                emoji: "😌",
+            },
+            {
+                name: "Happy",
+                value: 28,
+                type: "purple",
+                emoji: "😊",
+            },
+            {
+                name: "Neutral",
+                value: 18,
+                type: "blue",
+                emoji: "😐",
+            },
+            {
+                name: "Anxious",
+                value: 7,
+                type: "coral",
+                emoji: "😟",
+            },
+            {
+                name: "Stressed",
+                value: 5,
+                type: "red",
+                emoji: "😣",
+            },
+        ],
+
+        balance: {
+            calm: 82,
+            stress: 22,
+        },
+
+        monthly: [
+            { label: "May", score: 72 },
+            { label: "Jun", score: 77 },
+            { label: "Jul", score: 81 },
+            { label: "Aug", score: 84 },
+        ],
+
+        trend: 6.4,
+
+        insight:
+            "Your emotional balance is trending positively. Calm and positive emotional states have appeared more frequently across your recent sessions.",
+    },
+
+    "This month": {
+        summary: {
+            wellbeing: 88,
+            sessions: 112,
+            confidence: 94,
+            duration: 19,
+        },
+
+        weekly: [
+            { label: "Week 1", score: 72 },
+            { label: "Week 2", score: 77 },
+            { label: "Week 3", score: 82 },
+            { label: "Week 4", score: 88 },
+        ],
+
+        emotions: [
+            {
+                name: "Calm",
+                value: 45,
+                type: "teal",
+                emoji: "😌",
+            },
+            {
+                name: "Happy",
+                value: 25,
+                type: "purple",
+                emoji: "😊",
+            },
+            {
+                name: "Neutral",
+                value: 17,
+                type: "blue",
+                emoji: "😐",
+            },
+            {
+                name: "Anxious",
+                value: 8,
+                type: "coral",
+                emoji: "😟",
+            },
+            {
+                name: "Stressed",
+                value: 5,
+                type: "red",
+                emoji: "😣",
+            },
+        ],
+
+        balance: {
+            calm: 85,
+            stress: 18,
+        },
+
+        monthly: [
+            { label: "Week 1", score: 72 },
+            { label: "Week 2", score: 77 },
+            { label: "Week 3", score: 82 },
+            { label: "Week 4", score: 88 },
+        ],
+
+        trend: 10.2,
+
+        insight:
+            "Your emotional balance has improved consistently throughout the month, with calm signals becoming increasingly dominant.",
+    },
+
+    "Last 3 months": {
+        summary: {
+            wellbeing: 84,
+            sessions: 326,
+            confidence: 92,
+            duration: 18,
+        },
+
+        weekly: [
+            { label: "May", score: 72 },
+            { label: "Jun", score: 77 },
+            { label: "Jul", score: 81 },
+            { label: "Aug", score: 84 },
+        ],
+
+        emotions: [
+            {
+                name: "Calm",
+                value: 48,
+                type: "teal",
+                emoji: "😌",
+            },
+            {
+                name: "Happy",
+                value: 24,
+                type: "purple",
+                emoji: "😊",
+            },
+            {
+                name: "Neutral",
+                value: 16,
+                type: "blue",
+                emoji: "😐",
+            },
+            {
+                name: "Anxious",
+                value: 7,
+                type: "coral",
+                emoji: "😟",
+            },
+            {
+                name: "Stressed",
+                value: 5,
+                type: "red",
+                emoji: "😣",
+            },
+        ],
+
+        balance: {
+            calm: 82,
+            stress: 22,
+        },
+
+        monthly: [
+            { label: "May", score: 72 },
+            { label: "Jun", score: 77 },
+            { label: "Jul", score: 81 },
+            { label: "Aug", score: 84 },
+        ],
+
+        trend: 16.7,
+
+        insight:
+            "Your long-term emotional trajectory shows steady improvement, with stronger calm signals and a gradual reduction in stress.",
+    },
+};
 
 function Reports() {
     const [period, setPeriod] = useState("This week");
-    const [showExportMessage, setShowExportMessage] =
+    const [showExportToast, setShowExportToast] =
         useState(false);
 
-    const maxScore = Math.max(
-        ...weeklyData.map((item) => item.score)
-    );
+    const currentData = reportData[period];
 
-    const minScore = Math.min(
-        ...weeklyData.map((item) => item.score)
-    );
-
-    const averageScore = Math.round(
-        weeklyData.reduce(
-            (total, item) => total + item.score,
+    const averageScore = useMemo(() => {
+        const total = currentData.weekly.reduce(
+            (sum, item) => sum + item.score,
             0
-        ) / weeklyData.length
-    );
-
-    const trend = useMemo(() => {
-        const first = weeklyData[0].score;
-        const last =
-            weeklyData[weeklyData.length - 1].score;
+        );
 
         return Math.round(
-            ((last - first) / first) * 100
+            total / currentData.weekly.length
         );
-    }, []);
+    }, [currentData]);
+
+    const chartPoints = useMemo(() => {
+        const data = currentData.weekly;
+
+        if (data.length === 1) {
+            return "50,50";
+        }
+
+        return data
+            .map((item, index) => {
+                const x =
+                    (index / (data.length - 1)) * 100;
+
+                const y = 100 - item.score;
+
+                return `${x},${y}`;
+            })
+            .join(" ");
+    }, [currentData]);
+
+    const areaPoints = useMemo(() => {
+        const data = currentData.weekly;
+
+        if (data.length === 1) {
+            return "0,100 50,50 100,100";
+        }
+
+        const points = data
+            .map((item, index) => {
+                const x =
+                    (index / (data.length - 1)) * 100;
+
+                const y = 100 - item.score;
+
+                return `${x},${y}`;
+            })
+            .join(" ");
+
+        return `0,100 ${points} 100,100`;
+    }, [currentData]);
 
     const handleExport = () => {
-        setShowExportMessage(true);
+        setShowExportToast(true);
 
         setTimeout(() => {
-            setShowExportMessage(false);
+            setShowExportToast(false);
         }, 2500);
     };
 
@@ -115,10 +295,7 @@ function Reports() {
       ===================================================== */}
 
             <aside className="reports-sidebar">
-                <a
-                    href="/dashboard"
-                    className="reports-brand"
-                >
+                <a href="/" className="reports-brand">
                     <span className="reports-brand__icon">
                         <Brain size={20} />
                     </span>
@@ -161,7 +338,7 @@ function Reports() {
                         href="/reports"
                         className="reports-nav__item reports-nav__item--active"
                     >
-                        <BarChart3 size={17} />
+                        <TrendingUp size={17} />
                         Reports
                     </a>
 
@@ -191,7 +368,8 @@ function Reports() {
                         <ShieldCheck size={15} />
 
                         <span>
-                            Your emotional data stays private.
+                            Your emotional insights remain private
+                            and under your control.
                         </span>
                     </div>
                 </div>
@@ -202,24 +380,24 @@ function Reports() {
       ===================================================== */}
 
             <section className="reports-main">
-                {/* Header */}
+                {/* HEADER */}
 
                 <header className="reports-header">
                     <div>
                         <span className="reports-header__eyebrow">
-                            INSIGHTS & ANALYTICS
+                            ANALYTICS
                         </span>
 
                         <h1>Reports & Analytics</h1>
 
                         <p>
-                            Understand how your emotional patterns
-                            change over time.
+                            Understand your emotional patterns and
+                            well-being trends.
                         </p>
                     </div>
 
                     <div className="reports-header__actions">
-                        <label className="reports-period">
+                        <div className="reports-period">
                             <CalendarDays size={14} />
 
                             <select
@@ -234,29 +412,30 @@ function Reports() {
                             </select>
 
                             <ChevronDown size={13} />
-                        </label>
+                        </div>
 
                         <button
                             type="button"
                             className="reports-export"
                             onClick={handleExport}
                         >
-                            <Download size={14} />
+                            <Download size={13} />
                             Export
                         </button>
                     </div>
                 </header>
 
-                {showExportMessage && (
-                    <div className="reports-export-toast">
-                        <CheckCircle2 size={15} />
+                {/* EXPORT TOAST */}
 
-                        Report export is ready in the demo.
+                {showExportToast && (
+                    <div className="reports-export-toast">
+                        <ShieldCheck size={14} />
+                        Report export prepared successfully.
                     </div>
                 )}
 
                 {/* =================================================
-            SUMMARY CARDS
+            SUMMARY
         ================================================= */}
 
                 <section className="reports-summary-grid">
@@ -268,22 +447,19 @@ function Reports() {
                             <span>WELL-BEING SCORE</span>
 
                             <div>
-                                <HeartPulse size={16} />
+                                <HeartPulse size={15} />
                             </div>
                         </div>
 
                         <div className="reports-summary-card__value">
-                            <strong>84</strong>
-
+                            <strong>{averageScore}</strong>
                             <span>/ 100</span>
                         </div>
 
                         <div className="reports-summary-card__trend reports-summary-card__trend--positive">
-                            <TrendingUp size={12} />
-
-                            <strong>+6.2%</strong>
-
-                            <span>vs last period</span>
+                            <ArrowUpRight size={12} />
+                            <strong>+{currentData.trend}%</strong>
+                            <span>vs previous period</span>
                         </div>
                     </Card>
 
@@ -295,22 +471,21 @@ function Reports() {
                             <span>SESSIONS</span>
 
                             <div>
-                                <Activity size={16} />
+                                <Activity size={15} />
                             </div>
                         </div>
 
                         <div className="reports-summary-card__value">
-                            <strong>28</strong>
-
-                            <span>sessions</span>
+                            <strong>
+                                {currentData.summary.sessions}
+                            </strong>
                         </div>
 
                         <div className="reports-summary-card__trend">
                             <TrendingUp size={12} />
-
-                            <strong>+4</strong>
-
-                            <span>this period</span>
+                            <span>
+                                completed monitoring sessions
+                            </span>
                         </div>
                     </Card>
 
@@ -322,22 +497,21 @@ function Reports() {
                             <span>AI CONFIDENCE</span>
 
                             <div>
-                                <Brain size={16} />
+                                <Brain size={15} />
                             </div>
                         </div>
 
                         <div className="reports-summary-card__value">
-                            <strong>93</strong>
-
+                            <strong>
+                                {currentData.summary.confidence}
+                            </strong>
                             <span>%</span>
                         </div>
 
                         <div className="reports-summary-card__trend reports-summary-card__trend--positive">
-                            <CheckCircle2 size={12} />
-
-                            <strong>Excellent</strong>
-
-                            <span>signal quality</span>
+                            <ArrowUpRight size={12} />
+                            <strong>High</strong>
+                            <span>model confidence</span>
                         </div>
                     </Card>
 
@@ -349,52 +523,44 @@ function Reports() {
                             <span>AVG. SESSION</span>
 
                             <div>
-                                <Clock3 size={16} />
+                                <Clock3 size={15} />
                             </div>
                         </div>
 
                         <div className="reports-summary-card__value">
-                            <strong>18</strong>
-
+                            <strong>
+                                {currentData.summary.duration}
+                            </strong>
                             <span>min</span>
                         </div>
 
                         <div className="reports-summary-card__trend">
-                            <span>Consistent session length</span>
+                            <span>average monitoring duration</span>
                         </div>
                     </Card>
                 </section>
 
                 {/* =================================================
-            CHART AREA
+            CHARTS
         ================================================= */}
 
                 <section className="reports-chart-grid">
-                    {/* WEEKLY TREND */}
-
-                    <Card
-                        className="reports-trend-card"
-                        padding="medium"
-                    >
+                    <Card padding="medium">
                         <div className="reports-card-header">
                             <div>
-                                <span>
-                                    EMOTIONAL TREND
-                                </span>
+                                <span>EMOTIONAL TREND</span>
 
-                                <h2>
-                                    Well-being over the week
-                                </h2>
+                                <h2>Well-being over time</h2>
 
                                 <p>
-                                    Your daily emotional balance score.
+                                    Your emotional well-being score for{" "}
+                                    {period.toLowerCase()}.
                                 </p>
                             </div>
 
                             <div className="reports-trend-badge">
-                                <TrendingUp size={13} />
-
-                                +{trend}% trend
+                                <ArrowUpRight size={12} />
+                                +{currentData.trend}%
                             </div>
                         </div>
 
@@ -420,99 +586,77 @@ function Reports() {
 
                                 <svg
                                     className="reports-chart-svg"
-                                    viewBox="0 0 700 260"
+                                    viewBox="0 0 100 100"
                                     preserveAspectRatio="none"
                                 >
                                     <defs>
                                         <linearGradient
-                                            id="reportsGradient"
+                                            id="reportsAreaGradient"
                                             x1="0"
-                                            x2="0"
                                             y1="0"
+                                            x2="0"
                                             y2="1"
                                         >
                                             <stop
                                                 offset="0%"
-                                                stopColor="#14b8a6"
-                                                stopOpacity="0.2"
+                                                stopColor="#14B8A6"
+                                                stopOpacity="0.22"
                                             />
 
                                             <stop
                                                 offset="100%"
-                                                stopColor="#14b8a6"
+                                                stopColor="#14B8A6"
                                                 stopOpacity="0"
                                             />
                                         </linearGradient>
                                     </defs>
 
-                                    <path
-                                        d="M0 115 L116 91 L233 100 L350 65 L466 40 L583 55 L700 62 L700 260 L0 260 Z"
-                                        fill="url(#reportsGradient)"
+                                    <polygon
+                                        points={areaPoints}
+                                        fill="url(#reportsAreaGradient)"
                                     />
 
-                                    <path
-                                        d="M0 115 L116 91 L233 100 L350 65 L466 40 L583 55 L700 62"
+                                    <polyline
+                                        points={chartPoints}
                                         fill="none"
-                                        stroke="#14b8a6"
-                                        strokeWidth="3"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
+                                        stroke="#14B8A6"
+                                        strokeWidth="2"
+                                        vectorEffect="non-scaling-stroke"
                                     />
 
-                                    <circle
-                                        cx="0"
-                                        cy="115"
-                                        r="5"
-                                        fill="#14b8a6"
-                                    />
+                                    {currentData.weekly.map(
+                                        (item, index) => {
+                                            const x =
+                                                currentData.weekly.length ===
+                                                    1
+                                                    ? 50
+                                                    : (index /
+                                                        (currentData.weekly.length -
+                                                            1)) *
+                                                    100;
 
-                                    <circle
-                                        cx="116"
-                                        cy="91"
-                                        r="5"
-                                        fill="#14b8a6"
-                                    />
+                                            const y = 100 - item.score;
 
-                                    <circle
-                                        cx="233"
-                                        cy="100"
-                                        r="5"
-                                        fill="#14b8a6"
-                                    />
-
-                                    <circle
-                                        cx="350"
-                                        cy="65"
-                                        r="5"
-                                        fill="#14b8a6"
-                                    />
-
-                                    <circle
-                                        cx="466"
-                                        cy="40"
-                                        r="6"
-                                        fill="#14b8a6"
-                                    />
-
-                                    <circle
-                                        cx="583"
-                                        cy="55"
-                                        r="5"
-                                        fill="#14b8a6"
-                                    />
-
-                                    <circle
-                                        cx="700"
-                                        cy="62"
-                                        r="5"
-                                        fill="#14b8a6"
-                                    />
+                                            return (
+                                                <circle
+                                                    key={`${item.label}-${index}`}
+                                                    cx={x}
+                                                    cy={y}
+                                                    r="1.5"
+                                                    fill="#0F172A"
+                                                    stroke="#14B8A6"
+                                                    strokeWidth="1"
+                                                    vectorEffect="non-scaling-stroke"
+                                                />
+                                            );
+                                        }
+                                    )}
                                 </svg>
 
                                 <div className="reports-chart-labels">
-                                    {weeklyData.map((item) => (
-                                        <span key={item.day}>
-                                            {item.day}
+                                    {currentData.weekly.map((item) => (
+                                        <span key={item.label}>
+                                            {item.label}
                                         </span>
                                     ))}
                                 </div>
@@ -522,74 +666,83 @@ function Reports() {
                         <div className="reports-chart-footer">
                             <div>
                                 <span>Average</span>
-
                                 <strong>{averageScore}</strong>
                             </div>
 
                             <div>
                                 <span>Highest</span>
-
-                                <strong>{maxScore}</strong>
+                                <strong>
+                                    {Math.max(
+                                        ...currentData.weekly.map(
+                                            (item) => item.score
+                                        )
+                                    )}
+                                </strong>
                             </div>
 
                             <div>
                                 <span>Lowest</span>
-
-                                <strong>{minScore}</strong>
+                                <strong>
+                                    {Math.min(
+                                        ...currentData.weekly.map(
+                                            (item) => item.score
+                                        )
+                                    )}
+                                </strong>
                             </div>
                         </div>
                     </Card>
 
-                    {/* EMOTION DISTRIBUTION */}
+                    {/* DONUT */}
 
-                    <Card
-                        className="reports-emotion-card"
-                        padding="medium"
-                    >
+                    <Card padding="medium">
                         <div className="reports-card-header">
                             <div>
-                                <span>
-                                    EMOTION DISTRIBUTION
-                                </span>
+                                <span>EMOTION DISTRIBUTION</span>
 
-                                <h2>
-                                    Your emotional mix
-                                </h2>
+                                <h2>How you've been feeling</h2>
+
+                                <p>
+                                    Distribution of detected emotional
+                                    states.
+                                </p>
                             </div>
-
-                            <BarChart3
-                                size={17}
-                                className="reports-card-icon"
-                            />
                         </div>
 
                         <div className="reports-donut">
-                            <div className="reports-donut__ring">
+                            <div
+                                className="reports-donut__ring"
+                                style={{
+                                    background: createDonutGradient(
+                                        currentData.emotions
+                                    ),
+                                }}
+                            >
                                 <div className="reports-donut__center">
-                                    <strong>42%</strong>
+                                    <strong>
+                                        {currentData.summary.sessions}
+                                    </strong>
 
-                                    <span>Calm</span>
+                                    <span>sessions</span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="reports-emotion-list">
-                            {emotionData.map((emotion) => (
+                            {currentData.emotions.map((emotion) => (
                                 <div
                                     className="reports-emotion-item"
                                     key={emotion.name}
                                 >
                                     <div className="reports-emotion-item__name">
-                                        <i
+                                        <span
                                             className={`reports-emotion-dot reports-emotion-dot--${emotion.type}`}
                                         />
 
-                                        <span>
-                                            {emotion.emoji}
-                                        </span>
+                                        <span>{emotion.name}</span>
 
                                         <strong>
-                                            {emotion.name}
+                                            {emotion.emoji}
                                         </strong>
                                     </div>
 
@@ -603,9 +756,7 @@ function Reports() {
                                             />
                                         </div>
 
-                                        <strong>
-                                            {emotion.value}%
-                                        </strong>
+                                        <strong>{emotion.value}%</strong>
                                     </div>
                                 </div>
                             ))}
@@ -614,34 +765,22 @@ function Reports() {
                 </section>
 
                 {/* =================================================
-            CALM VS STRESS
+            SECONDARY
         ================================================= */}
 
                 <section className="reports-secondary-grid">
-                    <Card
-                        className="reports-balance-card"
-                        padding="medium"
-                    >
+                    <Card padding="medium">
                         <div className="reports-card-header">
                             <div>
-                                <span>
-                                    BALANCE ANALYSIS
-                                </span>
+                                <span>EMOTIONAL BALANCE</span>
 
-                                <h2>
-                                    Calm vs. stress
-                                </h2>
+                                <h2>Calm vs. stress</h2>
 
                                 <p>
-                                    Comparing your strongest positive and
-                                    negative signals.
+                                    Compare your positive and stressful
+                                    emotional signals.
                                 </p>
                             </div>
-
-                            <ShieldCheck
-                                size={17}
-                                className="reports-card-icon"
-                            />
                         </div>
 
                         <div className="reports-balance-bars">
@@ -652,14 +791,16 @@ function Reports() {
                                         Calm
                                     </span>
 
-                                    <strong>82%</strong>
+                                    <strong>
+                                        {currentData.balance.calm}%
+                                    </strong>
                                 </div>
 
                                 <div className="reports-balance-track">
                                     <span
                                         className="reports-balance-fill reports-balance-fill--calm"
                                         style={{
-                                            width: "82%",
+                                            width: `${currentData.balance.calm}%`,
                                         }}
                                     />
                                 </div>
@@ -672,14 +813,16 @@ function Reports() {
                                         Stress
                                     </span>
 
-                                    <strong>22%</strong>
+                                    <strong>
+                                        {currentData.balance.stress}%
+                                    </strong>
                                 </div>
 
                                 <div className="reports-balance-track">
                                     <span
                                         className="reports-balance-fill reports-balance-fill--stress"
                                         style={{
-                                            width: "22%",
+                                            width: `${currentData.balance.stress}%`,
                                         }}
                                     />
                                 </div>
@@ -688,49 +831,46 @@ function Reports() {
 
                         <div className="reports-balance-result">
                             <div>
-                                <CheckCircle2 size={17} />
+                                <HeartPulse size={15} />
                             </div>
 
                             <span>
-                                Your calm signals are currently
-                                <strong> 3.7× stronger </strong>
+                                Your calm signals are currently{" "}
+                                <strong>
+                                    {Math.max(
+                                        currentData.balance.calm -
+                                        currentData.balance.stress,
+                                        0
+                                    )}
+                                    % higher
+                                </strong>{" "}
                                 than your stress signals.
                             </span>
                         </div>
                     </Card>
 
-                    {/* MONTHLY PROGRESS */}
-
-                    <Card
-                        className="reports-progress-card"
-                        padding="medium"
-                    >
+                    <Card padding="medium">
                         <div className="reports-card-header">
                             <div>
-                                <span>
-                                    LONG-TERM PROGRESS
-                                </span>
+                                <span>LONG-TERM TREND</span>
 
-                                <h2>
-                                    Well-being trajectory
-                                </h2>
+                                <h2>Well-being trajectory</h2>
+
+                                <p>
+                                    Progress across the selected period.
+                                </p>
                             </div>
-
-                            <TrendingUp
-                                size={17}
-                                className="reports-card-icon"
-                            />
                         </div>
 
                         <div className="reports-monthly-chart">
-                            {monthlyScores.map((item) => (
+                            {currentData.monthly.map((item) => (
                                 <div
                                     className="reports-month-column"
-                                    key={item.month}
+                                    key={item.label}
                                 >
-                                    <div className="reports-month-value">
+                                    <span className="reports-month-value">
                                         {item.score}
-                                    </div>
+                                    </span>
 
                                     <div className="reports-month-track">
                                         <span
@@ -741,7 +881,7 @@ function Reports() {
                                     </div>
 
                                     <span className="reports-month-label">
-                                        {item.month}
+                                        {item.label}
                                     </span>
                                 </div>
                             ))}
@@ -762,64 +902,88 @@ function Reports() {
                     </div>
 
                     <div className="reports-ai-content">
-                        <span>AI-GENERATED INSIGHT</span>
+                        <span>AI WELL-BEING INSIGHT</span>
 
-                        <h2>
-                            Your emotional balance is trending positively.
-                        </h2>
+                        <h2>{currentData.insight}</h2>
 
                         <p>
-                            MindPulse detected a gradual improvement in
-                            your well-being score across recent sessions.
-                            Calm signals remained consistently strong,
-                            while stress-related signals stayed relatively
-                            low. Maintaining regular breaks and reflective
-                            sessions may help preserve this balance.
+                            MindPulse analyzes emotional patterns
+                            across your monitoring sessions to help
+                            you understand changes in your overall
+                            well-being.
                         </p>
 
                         <div className="reports-ai-tags">
                             <span>
-                                <TrendingUp size={12} />
+                                <TrendingUp size={11} />
                                 Positive trend
                             </span>
 
                             <span>
-                                <ShieldCheck size={12} />
-                                Low stress
+                                <HeartPulse size={11} />
+                                Balanced signals
                             </span>
 
                             <span>
-                                <Lightbulb size={12} />
-                                Stable pattern
+                                <Brain size={11} />
+                                AI analyzed
                             </span>
                         </div>
                     </div>
                 </Card>
 
-                {/* Disclaimer */}
+                {/* DISCLAIMER */}
 
                 <div className="reports-disclaimer">
-                    <Lightbulb size={14} />
+                    <Info size={13} />
 
                     <span>
-                        MindPulse insights are intended for personal
-                        awareness and reflection. They are not a medical
-                        diagnosis or substitute for professional care.
+                        MindPulse AI provides emotional pattern
+                        insights for self-awareness and is not a
+                        medical diagnostic system. These insights
+                        should not replace professional medical
+                        advice.
                     </span>
                 </div>
 
+                {/* FOOTER */}
+
                 <footer className="reports-footer">
                     <span>
-                        MindPulse AI • Emotional analytics
+                        MindPulse AI • Emotion Recognition &
+                        Well-being Monitoring
                     </span>
 
                     <span>
-                        Privacy-first • Human-centric
+                        Privacy-first • Human-centric • 2026
                     </span>
                 </footer>
             </section>
         </main>
     );
+}
+
+function createDonutGradient(emotions) {
+    const colors = {
+        teal: "#14B8A6",
+        purple: "#C084FC",
+        blue: "#60A5FA",
+        coral: "#FB7185",
+        red: "#F43F5E",
+    };
+
+    let currentDegree = 0;
+
+    const segments = emotions.map((emotion) => {
+        const start = currentDegree;
+
+        currentDegree +=
+            (emotion.value / 100) * 360;
+
+        return `${colors[emotion.type]} ${start}deg ${currentDegree}deg`;
+    });
+
+    return `conic-gradient(${segments.join(", ")})`;
 }
 
 export default Reports;
