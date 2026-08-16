@@ -7,6 +7,7 @@ import Monitoring from "../pages/Monitoring/Monitoring";
 import History from "../pages/History/History";
 import Reports from "../pages/Reports/Reports";
 import Profile from "../pages/Profile/Profile";
+import Settings from "../pages/Settings/Settings";
 
 function PlaceholderPage({ title }) {
   return (
@@ -44,10 +45,7 @@ function AppRoutes() {
 
       <Route path="/profile" element={<Profile />} />
 
-      <Route
-        path="/settings"
-        element={<PlaceholderPage title="Settings" />}
-      />
+      <Route path="/settings" element={<Settings />} />
 
       <Route
         path="*"

@@ -1,0 +1,707 @@
+/* ============================================================
+   MindPulse AI — Settings
+   Aura Balance Dark UI
+   ============================================================ */
+
+.settings-page {
+    min-height: 100vh;
+
+    display: flex;
+
+    background:
+        radial-gradient(circle at 75% 0%,
+            rgba(20, 184, 166, 0.04),
+            transparent 30%),
+        #080e14;
+
+    color: #f8fafc;
+}
+
+/* ============================================================
+   SIDEBAR
+   ============================================================ */
+
+.settings-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+
+    width: 235px;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 1.25rem;
+
+    background: rgba(8, 14, 20, 0.96);
+
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+
+    backdrop-filter: blur(16px);
+
+    z-index: 20;
+}
+
+.settings-brand {
+    display: flex;
+    align-items: center;
+
+    gap: 0.65rem;
+
+    color: #f8fafc;
+
+    font-size: 0.95rem;
+    font-weight: 650;
+
+    text-decoration: none;
+}
+
+.settings-brand strong {
+    color: #14b8a6;
+}
+
+.settings-brand__icon {
+    width: 37px;
+    height: 37px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #14b8a6;
+
+    background: rgba(20, 184, 166, 0.07);
+
+    border: 1px solid rgba(20, 184, 166, 0.18);
+
+    border-radius: 10px;
+}
+
+.settings-nav {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.25rem;
+
+    margin-top: 2.5rem;
+}
+
+.settings-nav__label {
+    margin: 0 0 0.55rem 0.7rem;
+
+    color: #465366;
+
+    font-size: 0.57rem;
+    font-weight: 700;
+
+    letter-spacing: 0.14em;
+}
+
+.settings-nav__label--second {
+    margin-top: 1.7rem;
+}
+
+.settings-nav__item {
+    display: flex;
+    align-items: center;
+
+    gap: 0.7rem;
+
+    padding: 0.7rem 0.75rem;
+
+    color: #68768a;
+
+    border: 1px solid transparent;
+
+    border-radius: 0.65rem;
+
+    font-size: 0.74rem;
+
+    text-decoration: none;
+
+    transition: 180ms ease;
+}
+
+.settings-nav__item:hover {
+    color: #cbd5e1;
+
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.settings-nav__item--active {
+    color: #14b8a6;
+
+    background: rgba(20, 184, 166, 0.07);
+
+    border-color: rgba(20, 184, 166, 0.12);
+}
+
+.settings-sidebar__bottom {
+    margin-top: auto;
+}
+
+.settings-privacy {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 0.45rem;
+
+    padding: 0.7rem;
+
+    color: #526074;
+
+    background: rgba(20, 184, 166, 0.035);
+
+    border: 1px solid rgba(20, 184, 166, 0.07);
+
+    border-radius: 0.7rem;
+
+    font-size: 0.54rem;
+
+    line-height: 1.5;
+}
+
+.settings-privacy svg {
+    flex-shrink: 0;
+
+    color: #14b8a6;
+}
+
+/* ============================================================
+   MAIN
+   ============================================================ */
+
+.settings-main {
+    width: calc(100% - 235px);
+
+    margin-left: 235px;
+
+    padding: 2rem 2.2rem 1rem;
+
+    min-width: 0;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.settings-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+
+    gap: 1rem;
+
+    margin-bottom: 1.5rem;
+}
+
+.settings-header__eyebrow {
+    color: #14b8a6;
+
+    font-size: 0.62rem;
+    font-weight: 700;
+
+    letter-spacing: 0.15em;
+}
+
+.settings-header h1 {
+    margin: 0.4rem 0 0.3rem;
+
+    color: #f8fafc;
+
+    font-size: clamp(1.6rem, 2.5vw, 2.25rem);
+
+    letter-spacing: -0.04em;
+}
+
+.settings-header p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: clamp(0.78rem, 0.3vw + 0.7rem, 0.95rem);
+}
+
+.settings-save-button {
+    display: flex;
+    align-items: center;
+
+    gap: 0.4rem;
+
+    padding: 0.7rem 0.95rem;
+
+    color: #061413;
+
+    background: #14b8a6;
+
+    border: 1px solid #14b8a6;
+
+    border-radius: 0.65rem;
+
+    font: inherit;
+    font-size: 0.72rem;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: 180ms ease;
+}
+
+.settings-save-button:hover {
+    background: #2dd4bf;
+
+    border-color: #2dd4bf;
+}
+
+/* ============================================================
+   SECTION
+   ============================================================ */
+
+.settings-section-card {
+    margin-bottom: 0.9rem;
+}
+
+.settings-section-heading {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 0.75rem;
+
+    margin-bottom: 1rem;
+}
+
+.settings-section-icon {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    color: #14b8a6;
+
+    background: rgba(20, 184, 166, 0.055);
+
+    border: 1px solid rgba(20, 184, 166, 0.1);
+
+    border-radius: 0.65rem;
+}
+
+.settings-section-heading>div:last-child>span {
+    color: #14b8a6;
+
+    font-size: 0.58rem;
+    font-weight: 700;
+
+    letter-spacing: 0.12em;
+}
+
+.settings-section-heading h2 {
+    margin: 0.3rem 0 0.25rem;
+
+    color: #dbe3ed;
+
+    font-size: clamp(1rem, 0.3vw + 0.9rem, 1.2rem);
+}
+
+.settings-section-heading p {
+    margin: 0;
+
+    color: #59687c;
+
+    font-size: clamp(0.75rem, 0.2vw + 0.7rem, 0.88rem);
+
+    line-height: 1.5;
+}
+
+/* ============================================================
+   SETTING ROW
+   ============================================================ */
+
+.settings-option {
+    display: flex;
+    align-items: center;
+
+    gap: 0.7rem;
+
+    padding: 0.8rem 0;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.045);
+}
+
+.settings-option__icon {
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    color: #526074;
+
+    background: rgba(255, 255, 255, 0.025);
+
+    border-radius: 0.5rem;
+}
+
+.settings-option__content {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.2rem;
+
+    min-width: 0;
+}
+
+.settings-option__content strong {
+    color: #a8b3c2;
+
+    font-size: clamp(0.8rem, 0.2vw + 0.75rem, 0.92rem);
+}
+
+.settings-option__content span {
+    color: #526074;
+
+    font-size: clamp(0.7rem, 0.15vw + 0.66rem, 0.82rem);
+
+    line-height: 1.45;
+}
+
+.settings-toggle {
+    position: relative;
+
+    width: 42px;
+    height: 23px;
+
+    margin-left: auto;
+
+    flex-shrink: 0;
+
+    padding: 0;
+
+    background: #18222e;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    border-radius: 999px;
+
+    cursor: pointer;
+
+    transition: 180ms ease;
+}
+
+.settings-toggle>span {
+    position: absolute;
+
+    top: 3px;
+    left: 3px;
+
+    width: 15px;
+    height: 15px;
+
+    background: #526074;
+
+    border-radius: 50%;
+
+    transition: 180ms ease;
+}
+
+.settings-toggle--on {
+    background: rgba(20, 184, 166, 0.2);
+
+    border-color: rgba(20, 184, 166, 0.3);
+}
+
+.settings-toggle--on>span {
+    left: 22px;
+
+    background: #14b8a6;
+}
+
+/* ============================================================
+   SECURITY
+   ============================================================ */
+
+.settings-security-banner {
+    display: flex;
+    align-items: center;
+
+    gap: 0.65rem;
+
+    margin-top: 0.65rem;
+
+    padding: 0.85rem;
+
+    background: rgba(20, 184, 166, 0.035);
+
+    border: 1px solid rgba(20, 184, 166, 0.08);
+
+    border-radius: 0.7rem;
+}
+
+.settings-security-banner>svg:first-child {
+    color: #14b8a6;
+
+    flex-shrink: 0;
+}
+
+.settings-security-banner>div {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.2rem;
+}
+
+.settings-security-banner strong {
+    color: #8b98aa;
+
+    font-size: 0.72rem;
+}
+
+.settings-security-banner span {
+    color: #526074;
+
+    font-size: 0.62rem;
+
+    line-height: 1.45;
+}
+
+.settings-security-banner>svg:last-child {
+    margin-left: auto;
+
+    color: #465366;
+}
+
+/* ============================================================
+   ACCOUNT
+   ============================================================ */
+
+.settings-account-card {
+    display: flex;
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 1.5rem;
+
+    margin-bottom: 1rem;
+}
+
+.settings-account-card>div:first-child>span {
+    color: #fb7185;
+
+    font-size: 0.58rem;
+    font-weight: 700;
+
+    letter-spacing: 0.12em;
+}
+
+.settings-account-card h2 {
+    margin: 0.3rem 0 0.25rem;
+
+    color: #dbe3ed;
+
+    font-size: 1rem;
+}
+
+.settings-account-card p {
+    margin: 0;
+
+    color: #59687c;
+
+    font-size: 0.72rem;
+}
+
+.settings-account-actions {
+    display: flex;
+    flex-direction: column;
+
+    gap: 0.4rem;
+
+    min-width: 210px;
+}
+
+.settings-account-actions a,
+.settings-account-actions button {
+    display: flex;
+    align-items: center;
+
+    gap: 0.45rem;
+
+    padding: 0.65rem 0.75rem;
+
+    color: #68768a;
+
+    background: rgba(255, 255, 255, 0.02);
+
+    border: 1px solid rgba(255, 255, 255, 0.05);
+
+    border-radius: 0.6rem;
+
+    font: inherit;
+    font-size: 0.66rem;
+
+    text-decoration: none;
+
+    cursor: pointer;
+
+    transition: 180ms ease;
+}
+
+.settings-account-actions a:hover {
+    color: #14b8a6;
+
+    border-color: rgba(20, 184, 166, 0.14);
+}
+
+.settings-account-actions button:hover {
+    color: #fb7185;
+
+    border-color: rgba(251, 113, 133, 0.14);
+}
+
+.settings-account-actions svg:last-child {
+    margin-left: auto;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.settings-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 1rem 0;
+
+    color: #3f4b5d;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+
+    font-size: 0.62rem;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+    .settings-sidebar {
+        position: static;
+
+        width: 70px;
+
+        padding: 1rem 0.7rem;
+    }
+
+    .settings-brand span:last-child,
+    .settings-nav__label,
+    .settings-privacy {
+        display: none;
+    }
+
+    .settings-brand {
+        justify-content: center;
+    }
+
+    .settings-nav {
+        margin-top: 2rem;
+    }
+
+    .settings-nav__item {
+        justify-content: center;
+
+        padding: 0.7rem;
+    }
+
+    .settings-main {
+        width: calc(100% - 70px);
+
+        margin-left: 0;
+
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 650px) {
+    .settings-page {
+        display: block;
+    }
+
+    .settings-sidebar {
+        position: sticky;
+        top: 0;
+
+        width: 100%;
+        height: 58px;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        padding: 0 1rem;
+
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .settings-brand {
+        justify-content: flex-start;
+    }
+
+    .settings-nav {
+        flex-direction: row;
+
+        margin: 0 0 0 auto;
+    }
+
+    .settings-nav__item {
+        display: none;
+    }
+
+    .settings-nav__item:nth-of-type(1),
+    .settings-nav__item:nth-of-type(2),
+    .settings-nav__item:nth-of-type(3) {
+        display: flex;
+    }
+
+    .settings-main {
+        width: 100%;
+
+        padding: 1.2rem 1rem;
+    }
+
+    .settings-header {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .settings-save-button {
+        width: 100%;
+
+        justify-content: center;
+    }
+
+    .settings-account-card {
+        align-items: flex-start;
+
+        flex-direction: column;
+    }
+
+    .settings-account-actions {
+        width: 100%;
+    }
+
+    .settings-footer {
+        align-items: flex-start;
+
+        flex-direction: column;
+
+        gap: 0.35rem;
+    }
+}
