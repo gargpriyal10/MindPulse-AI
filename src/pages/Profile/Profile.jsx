@@ -21,6 +21,7 @@ import "./Profile.css";
 
 function Profile() {
     const [editing, setEditing] = useState(false);
+    const [saved, setSaved] = useState(false);
 
     const [profile, setProfile] = useState({
         name: "Priyal Garg",
@@ -29,18 +30,40 @@ function Profile() {
         timezone: "IST (UTC +5:30)",
     });
 
+    const [draftProfile, setDraftProfile] = useState(profile);
+
+    const handleEdit = () => {
+        setDraftProfile(profile);
+        setSaved(false);
+        setEditing(true);
+    };
+
     const handleChange = (event) => {
         const { name, value } = event.target;
 
-        setProfile((current) => ({
+        setDraftProfile((current) => ({
             ...current,
             [name]: value,
         }));
+
+        setSaved(false);
+    };
+
+    const handleSave = () => {
+        setProfile(draftProfile);
+        setEditing(false);
+        setSaved(true);
+
+        setTimeout(() => {
+            setSaved(false);
+        }, 3000);
     };
 
     return (
         <main className="profile-page">
-            {/* SIDEBAR */}
+            {/* =====================================================
+          SIDEBAR
+      ===================================================== */}
 
             <aside className="profile-sidebar">
                 <a href="/dashboard" className="profile-brand">
@@ -58,22 +81,34 @@ function Profile() {
                         WORKSPACE
                     </span>
 
-                    <a href="/dashboard" className="profile-nav__item">
+                    <a
+                        href="/dashboard"
+                        className="profile-nav__item"
+                    >
                         <Activity size={17} />
                         Overview
                     </a>
 
-                    <a href="/monitoring" className="profile-nav__item">
+                    <a
+                        href="/monitoring"
+                        className="profile-nav__item"
+                    >
                         <HeartPulse size={17} />
                         Monitoring
                     </a>
 
-                    <a href="/history" className="profile-nav__item">
+                    <a
+                        href="/history"
+                        className="profile-nav__item"
+                    >
                         <Clock3 size={17} />
                         History
                     </a>
 
-                    <a href="/reports" className="profile-nav__item">
+                    <a
+                        href="/reports"
+                        className="profile-nav__item"
+                    >
                         <Activity size={17} />
                         Reports
                     </a>
@@ -90,7 +125,10 @@ function Profile() {
                         Profile
                     </a>
 
-                    <a href="/settings" className="profile-nav__item">
+                    <a
+                        href="/settings"
+                        className="profile-nav__item"
+                    >
                         <ShieldCheck size={17} />
                         Settings
                     </a>
@@ -108,7 +146,9 @@ function Profile() {
                 </div>
             </aside>
 
-            {/* MAIN */}
+            {/* =====================================================
+          MAIN
+      ===================================================== */}
 
             <section className="profile-main">
                 <header className="profile-header">
@@ -125,34 +165,53 @@ function Profile() {
                         </p>
                     </div>
 
-                    <button
-                        type="button"
-                        className={
-                            editing
-                                ? "profile-save-button"
-                                : "profile-edit-button"
-                        }
-                        onClick={() => setEditing((value) => !value)}
-                    >
-                        {editing ? (
-                            <>
-                                <CheckCircle2 size={14} />
-                                Save changes
-                            </>
-                        ) : (
-                            <>
-                                <Edit3 size={14} />
-                                Edit profile
-                            </>
-                        )}
-                    </button>
+                    {editing ? (
+                        <button
+                            type="button"
+                            className="profile-save-button"
+                            onClick={handleSave}
+                        >
+                            <CheckCircle2 size={14} />
+                            Save changes
+                        </button>
+                    ) : (
+                        <button
+                            type="button"
+                            className="profile-edit-button"
+                            onClick={handleEdit}
+                        >
+                            <Edit3 size={14} />
+                            Edit profile
+                        </button>
+                    )}
                 </header>
 
-                {/* PROFILE HERO */}
+                {/* SAVE CONFIRMATION */}
 
-                <Card className="profile-hero" padding="medium">
+                {saved && (
+                    <div className="profile-save-message">
+                        <CheckCircle2 size={14} />
+                        Profile changes saved successfully.
+                    </div>
+                )}
+
+                {/* =================================================
+            PROFILE HERO
+        ================================================= */}
+
+                <Card
+                    className="profile-hero"
+                    padding="medium"
+                >
                     <div className="profile-avatar">
-                        <span>PG</span>
+                        <span>
+                            {profile.name
+                                .split(" ")
+                                .map((word) => word[0])
+                                .join("")
+                                .slice(0, 2)
+                                .toUpperCase()}
+                        </span>
 
                         <i>
                             <CheckCircle2 size={11} />
@@ -198,7 +257,9 @@ function Profile() {
                     </div>
                 </Card>
 
-                {/* INFORMATION + STATS */}
+                {/* =================================================
+            INFORMATION + STATS
+        ================================================= */}
 
                 <section className="profile-content-grid">
                     <Card
@@ -224,7 +285,7 @@ function Profile() {
 
                                     <input
                                         name="name"
-                                        value={profile.name}
+                                        value={draftProfile.name}
                                         onChange={handleChange}
                                         disabled={!editing}
                                     />
@@ -240,7 +301,7 @@ function Profile() {
                                     <input
                                         name="email"
                                         type="email"
-                                        value={profile.email}
+                                        value={draftProfile.email}
                                         onChange={handleChange}
                                         disabled={!editing}
                                     />
@@ -255,7 +316,7 @@ function Profile() {
 
                                     <input
                                         name="location"
-                                        value={profile.location}
+                                        value={draftProfile.location}
                                         onChange={handleChange}
                                         disabled={!editing}
                                     />
@@ -270,7 +331,7 @@ function Profile() {
 
                                     <input
                                         name="timezone"
-                                        value={profile.timezone}
+                                        value={draftProfile.timezone}
                                         onChange={handleChange}
                                         disabled={!editing}
                                     />
@@ -349,7 +410,9 @@ function Profile() {
                     </Card>
                 </section>
 
-                {/* ACTIVITY */}
+                {/* =================================================
+            ACTIVITY
+        ================================================= */}
 
                 <section className="profile-lower-grid">
                     <Card

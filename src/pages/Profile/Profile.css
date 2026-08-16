@@ -195,6 +195,28 @@
     background: #2dd4bf;
 }
 
+.profile-save-message {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+
+    margin-bottom: 0.8rem;
+    padding: 0.7rem 0.85rem;
+
+    color: #5d9c92;
+    background: rgba(20, 184, 166, 0.045);
+
+    border: 1px solid rgba(20, 184, 166, 0.1);
+    border-radius: 0.65rem;
+
+    font-size: 0.58rem;
+}
+
+.profile-save-message svg {
+    color: #14b8a6;
+    flex-shrink: 0;
+}
+
 /* ============================================================
    PROFILE HERO
    ============================================================ */
