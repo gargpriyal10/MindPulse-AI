@@ -5,6 +5,11 @@ import {
 } from "react";
 
 import {
+  FaceDetector,
+  FilesetResolver,
+} from "@mediapipe/tasks-vision";
+
+import {
   Activity,
   AlertCircle,
   ArrowLeft,
@@ -25,11 +30,20 @@ import {
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 
+import {
+  startMonitoringSession,
+  finishMonitoringSession,
+} from "../../services/monitoringService";
+
 import "./Monitoring.css";
 
 function Monitoring() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+
+  const faceDetectorRef = useRef(null);
+  const faceAnimationRef = useRef(null);
+  const sessionRef = useRef(null);
 
   const [isMonitoring, setIsMonitoring] =
     useState(false);
@@ -45,6 +59,12 @@ function Monitoring() {
 
   const [cameraReady, setCameraReady] =
     useState(false);
+
+  const [faceStatus, setFaceStatus] =
+    useState("idle");
+
+  const [faceBox, setFaceBox] =
+    useState(null);
 
   const [currentEmotion, setCurrentEmotion] =
     useState({
@@ -179,10 +199,266 @@ function Monitoring() {
   };
 
   /* ============================================================
+     FACE DETECTION
+  ============================================================ */
+
+  const startFaceDetection = async () => {
+    if (!videoRef.current) {
+      return;
+    }
+
+    if (faceDetectorRef.current) {
+      return;
+    }
+
+    setFaceStatus("loading");
+    setFaceBox(null);
+
+    try {
+      const vision =
+        await FilesetResolver.forVisionTasks(
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+        );
+
+      const detector =
+        await FaceDetector.createFromOptions(
+          vision,
+          {
+            baseOptions: {
+              modelAssetPath:
+                "https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite",
+            },
+            runningMode: "VIDEO",
+            minDetectionConfidence: 0.5,
+          }
+        );
+
+      faceDetectorRef.current = detector;
+
+      const detectFace = () => {
+        const video = videoRef.current;
+
+        if (
+          !video ||
+          video.readyState < 2 ||
+          !isMonitoring ||
+          isPaused
+        ) {
+          return;
+        }
+
+        try {
+          const result =
+            detector.detectForVideo(
+              video,
+              performance.now()
+            );
+
+          const detections =
+            result?.detections || [];
+
+          if (detections.length > 0) {
+            const box =
+              detections[0].boundingBox;
+
+            if (
+              box &&
+              video.videoWidth > 0 &&
+              video.videoHeight > 0
+            ) {
+              /*
+                The webcam video uses:
+                  object-fit: cover
+                  transform: scaleX(-1)
+
+                MediaPipe returns coordinates in the original
+                camera frame, so those coordinates must be mapped
+                to the displayed/cropped/mirrored video before the
+                FACE box is positioned.
+              */
+
+              const container =
+                video.parentElement;
+
+              const containerWidth =
+                container?.clientWidth ||
+                video.clientWidth;
+
+              const containerHeight =
+                container?.clientHeight ||
+                video.clientHeight;
+
+              const scale = Math.max(
+                containerWidth /
+                video.videoWidth,
+                containerHeight /
+                video.videoHeight
+              );
+
+              const renderedWidth =
+                video.videoWidth * scale;
+
+              const renderedHeight =
+                video.videoHeight * scale;
+
+              const cropX =
+                (renderedWidth -
+                  containerWidth) /
+                2;
+
+              const cropY =
+                (renderedHeight -
+                  containerHeight) /
+                2;
+
+              const rawLeft =
+                box.originX * scale -
+                cropX;
+
+              const rawTop =
+                box.originY * scale -
+                cropY;
+
+              const renderedBoxWidth =
+                box.width * scale;
+
+              const renderedBoxHeight =
+                box.height * scale;
+
+              /*
+                The video is mirrored with scaleX(-1).
+                Mirror the bounding box horizontally so it
+                stays over the user's face.
+              */
+              const mirroredLeft =
+                containerWidth -
+                rawLeft -
+                renderedBoxWidth;
+
+              setFaceBox({
+                x:
+                  (mirroredLeft /
+                    containerWidth) *
+                  100,
+
+                y:
+                  (rawTop /
+                    containerHeight) *
+                  100,
+
+                width:
+                  (renderedBoxWidth /
+                    containerWidth) *
+                  100,
+
+                height:
+                  (renderedBoxHeight /
+                    containerHeight) *
+                  100,
+              });
+            }
+
+            setFaceStatus("detected");
+          } else {
+            setFaceBox(null);
+            setFaceStatus("searching");
+          }
+        } catch (error) {
+          console.error(
+            "Face detection error:",
+            error
+          );
+
+          setFaceBox(null);
+          setFaceStatus("error");
+        }
+
+        faceAnimationRef.current =
+          requestAnimationFrame(
+            detectFace
+          );
+      };
+
+      setFaceStatus("searching");
+
+      faceAnimationRef.current =
+        requestAnimationFrame(
+          detectFace
+        );
+    } catch (error) {
+      console.error(
+        "Unable to initialize MediaPipe face detector:",
+        error
+      );
+
+      setFaceBox(null);
+      setFaceStatus("error");
+    }
+  };
+
+  const stopFaceDetection = () => {
+    if (faceAnimationRef.current) {
+      cancelAnimationFrame(
+        faceAnimationRef.current
+      );
+
+      faceAnimationRef.current = null;
+    }
+
+    if (faceDetectorRef.current) {
+      faceDetectorRef.current.close();
+
+      faceDetectorRef.current = null;
+    }
+
+    setFaceBox(null);
+    setFaceStatus("idle");
+  };
+
+  useEffect(() => {
+    if (
+      isMonitoring &&
+      cameraReady &&
+      !isPaused
+    ) {
+      startFaceDetection();
+    }
+
+    if (isPaused) {
+      if (faceAnimationRef.current) {
+        cancelAnimationFrame(
+          faceAnimationRef.current
+        );
+
+        faceAnimationRef.current = null;
+      }
+
+      setFaceBox(null);
+      setFaceStatus("paused");
+    }
+
+    return () => {
+      if (faceAnimationRef.current) {
+        cancelAnimationFrame(
+          faceAnimationRef.current
+        );
+
+        faceAnimationRef.current = null;
+      }
+    };
+  }, [
+    isMonitoring,
+    cameraReady,
+    isPaused,
+  ]);
+
+  /* ============================================================
      STOP CAMERA
   ============================================================ */
 
   const stopCamera = () => {
+    stopFaceDetection();
+
     if (streamRef.current) {
       streamRef.current
         .getTracks()
@@ -206,6 +482,16 @@ function Monitoring() {
 
   useEffect(() => {
     return () => {
+      if (faceAnimationRef.current) {
+        cancelAnimationFrame(
+          faceAnimationRef.current
+        );
+      }
+
+      if (faceDetectorRef.current) {
+        faceDetectorRef.current.close();
+      }
+
       if (streamRef.current) {
         streamRef.current
           .getTracks()
@@ -369,6 +655,11 @@ function Monitoring() {
         return;
       }
 
+      const session =
+        startMonitoringSession();
+
+      sessionRef.current = session;
+
       setElapsedSeconds(0);
       setIsPaused(false);
       setIsMonitoring(true);
@@ -380,6 +671,31 @@ function Monitoring() {
 
   const handleStopSession =
     () => {
+      if (sessionRef.current) {
+        finishMonitoringSession(
+          sessionRef.current.id,
+          {
+            duration: elapsedSeconds,
+            dominantEmotion:
+              currentEmotion.name,
+            confidence:
+              currentEmotion.confidence,
+            wellbeingScore: 84,
+            emotions:
+              emotionSignals.reduce(
+                (result, signal) => ({
+                  ...result,
+                  [signal.name]:
+                    signal.value,
+                }),
+                {}
+              ),
+          }
+        );
+
+        sessionRef.current = null;
+      }
+
       setIsMonitoring(false);
       setIsPaused(false);
 
@@ -776,6 +1092,50 @@ function Monitoring() {
                 </div>
 
               )}
+
+              {cameraReady && (
+                <div
+                  className={`monitoring-face-status monitoring-face-status--${faceStatus}`}
+                >
+                  <span className="monitoring-face-status__dot" />
+
+                  {faceStatus === "loading" &&
+                    "Starting face detection..."}
+
+                  {faceStatus === "searching" &&
+                    "Looking for a face..."}
+
+                  {faceStatus === "detected" &&
+                    "Face detected"}
+
+                  {faceStatus === "paused" &&
+                    "Face detection paused"}
+
+                  {faceStatus === "error" &&
+                    "Face detection unavailable"}
+
+                  {faceStatus === "idle" &&
+                    "Face detection ready"}
+                </div>
+              )}
+
+              {cameraReady &&
+                faceBox &&
+                faceStatus === "detected" && (
+                  <div
+                    className="monitoring-face-box"
+                    style={{
+                      left: `${faceBox.x}%`,
+                      top: `${faceBox.y}%`,
+                      width: `${faceBox.width}%`,
+                      height: `${faceBox.height}%`,
+                    }}
+                  >
+                    <span className="monitoring-face-box__label">
+                      FACE
+                    </span>
+                  </div>
+                )}
 
               {/* SESSION ENDED */}
 
