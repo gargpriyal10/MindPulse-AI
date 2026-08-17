@@ -23,15 +23,205 @@ import SessionCard from "../../components/domain/SessionCard";
 import ChartContainer from "../../components/domain/ChartContainer";
 
 import {
-  dashboardOverview,
-  recentEmotions,
-  sessionHistory,
-  dailyWellbeing,
-  wellbeingInsights,
   notifications,
 } from "../../services/mockData";
 
+import {
+  getMonitoringSessions,
+} from "../../services/monitoringService";
+
 import "./Dashboard.css";
+
+
+function getCompletedSessions() {
+  return getMonitoringSessions()
+    .filter((session) => session.status === "Completed")
+    .sort(
+      (a, b) =>
+        new Date(b.endedAt || b.startedAt) -
+        new Date(a.endedAt || a.startedAt)
+    );
+}
+
+function getWeekStart() {
+  const date = new Date();
+  date.setHours(0, 0, 0, 0);
+  const day = date.getDay();
+  const diff = day === 0 ? 6 : day - 1;
+  date.setDate(date.getDate() - diff);
+  return date;
+}
+
+function getAverage(values) {
+  const valid = values
+    .map(Number)
+    .filter((value) => Number.isFinite(value));
+
+  if (!valid.length) return 0;
+
+  return Math.round(
+    valid.reduce((sum, value) => sum + value, 0) /
+    valid.length
+  );
+}
+
+function getDominantEmotion(sessions) {
+  const totals = {};
+
+  sessions.forEach((session) => {
+    const emotions = session.emotions || {};
+
+    Object.entries(emotions).forEach(
+      ([emotion, value]) => {
+        const numericValue = Number(value) || 0;
+        totals[emotion] =
+          (totals[emotion] || 0) + numericValue;
+      }
+    );
+
+    if (
+      !Object.keys(emotions).length &&
+      session.dominantEmotion
+    ) {
+      totals[session.dominantEmotion] =
+        (totals[session.dominantEmotion] || 0) + 1;
+    }
+  });
+
+  const fallback = {
+    name: "Calm",
+    emoji: "😌",
+    intensity: 0,
+  };
+
+  const entries = Object.entries(totals);
+
+  if (!entries.length) return fallback;
+
+  const [name, value] = entries.sort(
+    (a, b) => b[1] - a[1]
+  )[0];
+
+  const emojiMap = {
+    Happy: "😊",
+    Calm: "😌",
+    Neutral: "😐",
+    Anxious: "😟",
+    Stressed: "😣",
+    Sad: "😔",
+  };
+
+  return {
+    name,
+    emoji: emojiMap[name] || "🙂",
+    intensity: Math.min(100, Math.round(value)),
+  };
+}
+
+function getEmotionData(sessions) {
+  const totals = {
+    Happy: 0,
+    Calm: 0,
+    Neutral: 0,
+    Anxious: 0,
+    Stressed: 0,
+    Sad: 0,
+  };
+
+  sessions.forEach((session) => {
+    const emotions = session.emotions || {};
+
+    Object.keys(totals).forEach((emotion) => {
+      totals[emotion] +=
+        Number(emotions[emotion]) || 0;
+    });
+
+    if (
+      !Object.values(emotions).some(
+        (value) => Number(value) > 0
+      ) &&
+      session.dominantEmotion &&
+      totals[session.dominantEmotion] !== undefined
+    ) {
+      totals[session.dominantEmotion] += 1;
+    }
+  });
+
+  const total = Object.values(totals).reduce(
+    (sum, value) => sum + value,
+    0
+  );
+
+  const emojiMap = {
+    Happy: "😊",
+    Calm: "😌",
+    Neutral: "😐",
+    Anxious: "😟",
+    Stressed: "😣",
+    Sad: "😔",
+  };
+
+  if (!total) return [];
+
+  return Object.entries(totals)
+    .map(([emotion, value]) => ({
+      emotion,
+      intensity: Math.round(
+        (value / total) * 100
+      ),
+      confidence:
+        getAverage(
+          sessions.map(
+            (session) => session.confidence
+          )
+        ),
+      trend: 0,
+      emoji: emojiMap[emotion] || "🙂",
+    }))
+    .sort((a, b) => b.intensity - a.intensity)
+    .slice(0, 4);
+}
+
+function getTrendData(sessions) {
+  const daily = [];
+
+  for (let index = 6; index >= 0; index -= 1) {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - index);
+
+    const daySessions = sessions.filter(
+      (session) => {
+        const sessionDate = new Date(
+          session.endedAt || session.startedAt
+        );
+
+        return (
+          sessionDate.getFullYear() ===
+          date.getFullYear() &&
+          sessionDate.getMonth() ===
+          date.getMonth() &&
+          sessionDate.getDate() ===
+          date.getDate()
+        );
+      }
+    );
+
+    daily.push({
+      date: date.toISOString().slice(0, 10),
+      label: date.toLocaleDateString("en-US", {
+        weekday: "short",
+      }),
+      score: getAverage(
+        daySessions.map(
+          (session) => session.wellbeingScore
+        )
+      ),
+    });
+  }
+
+  return daily;
+}
 
 function Dashboard() {
   const [showNotifications, setShowNotifications] =
@@ -40,47 +230,130 @@ function Dashboard() {
   const [notificationList, setNotificationList] =
     useState(notifications);
 
-  const emotionData = recentEmotions
-    .slice(0, 4)
-    .map((item) => ({
-      emotion: item.emotion,
-      intensity: item.intensity,
-      confidence: item.confidence,
-      trend: 0,
-    }));
+  const monitoringSessions =
+    getCompletedSessions();
 
-  const sessions = sessionHistory
+  const hasRealSessions =
+    monitoringSessions.length > 0;
+
+  const weekStart = getWeekStart();
+
+  const sessionsThisWeek =
+    monitoringSessions.filter((session) => {
+      const date = new Date(
+        session.endedAt || session.startedAt
+      );
+
+      return date >= weekStart;
+    });
+
+  const averageWellbeing =
+    getAverage(
+      monitoringSessions.map(
+        (session) => session.wellbeingScore
+      )
+    );
+
+  const previousAverage =
+    getAverage(
+      monitoringSessions
+        .slice(
+          sessionsThisWeek.length,
+          sessionsThisWeek.length * 2 || 1
+        )
+        .map(
+          (session) => session.wellbeingScore
+        )
+    );
+
+  const wellbeingChange =
+    previousAverage > 0
+      ? Number(
+        (
+          ((averageWellbeing -
+            previousAverage) /
+            previousAverage) *
+          100
+        ).toFixed(1)
+      )
+      : 0;
+
+  const recentEmotionData =
+    getEmotionData(monitoringSessions);
+
+  const emotionData =
+    hasRealSessions
+      ? recentEmotionData
+      : [];
+
+  const sessions = monitoringSessions
     .slice(0, 3)
     .map((session) => ({
       id: session.id,
 
-      date: new Date(session.date).toLocaleDateString(
-        "en-US",
-        {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }
-      ),
+      date: new Date(
+        session.endedAt ||
+        session.startedAt
+      ).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }),
 
-      startTime: session.startTime,
-      duration: session.duration,
-      dominantEmotion: session.dominantEmotion,
-      wellbeingScore: session.wellbeingScore,
-      confidence: session.confidence,
+      startTime: new Date(
+        session.startedAt
+      ).toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+
+      duration: session.duration || 0,
+      dominantEmotion:
+        session.dominantEmotion || "Calm",
+      wellbeingScore:
+        session.wellbeingScore || 0,
+      confidence:
+        session.confidence || 0,
       status: session.status,
     }));
 
-  const trendData = dailyWellbeing.map(
-    (item) => item.score
-  );
+  const trendData =
+    getTrendData(monitoringSessions);
 
-  const chartPoints = trendData
+  const fallbackTrend = [
+    62, 67, 65, 72, 70, 78, 75,
+  ];
+
+  const chartData =
+    hasRealSessions
+      ? trendData
+      : fallbackTrend.map(
+        (score, index) => ({
+          date: String(index),
+          label: [
+            "Mon",
+            "Tue",
+            "Wed",
+            "Thu",
+            "Fri",
+            "Sat",
+            "Sun",
+          ][index],
+          score,
+        })
+      );
+
+  const chartScores =
+    chartData.map((item) => item.score);
+
+  const chartPoints = chartScores
     .map((value, index) => {
       const x =
-        trendData.length === 1
+        chartScores.length === 1
           ? 50
-          : (index / (trendData.length - 1)) * 100;
+          : (index /
+            (chartScores.length - 1)) *
+          100;
 
       const y = 100 - value;
 
@@ -88,7 +361,79 @@ function Dashboard() {
     })
     .join(" ");
 
-  const latestInsight = wellbeingInsights[0];
+  const dominantEmotion =
+    getDominantEmotion(
+      monitoringSessions
+    );
+
+  const latestSession =
+    monitoringSessions[0];
+
+  const latestInsight = hasRealSessions
+    ? {
+      title:
+        "Your latest monitoring pattern",
+      description:
+        latestSession?.dominantEmotion
+          ? `Your latest session was primarily ${latestSession.dominantEmotion.toLowerCase()}. Keep using regular check-ins to understand how your emotional patterns change over time.`
+          : "Complete more monitoring sessions to build a personalized well-being trend.",
+      metric:
+        averageWellbeing > 0
+          ? `${averageWellbeing}%`
+          : "—",
+    }
+    : {
+      title:
+        "Your emotional balance is building.",
+      description:
+        "Complete a monitoring session to start generating personalized well-being insights.",
+      metric: "Ready",
+    };
+
+  const dashboardOverview = {
+    wellbeingScore:
+      averageWellbeing || 84,
+    wellbeingChange:
+      hasRealSessions
+        ? wellbeingChange
+        : 6.4,
+    totalSessions:
+      monitoringSessions.length || 28,
+    sessionsThisWeek:
+      sessionsThisWeek.length ||
+      0,
+    dominantEmotion,
+  };
+
+  const recentEmotions =
+    hasRealSessions
+      ? emotionData
+      : [
+        {
+          emotion: "Calm",
+          intensity: 76,
+          confidence: 93,
+          trend: 0,
+        },
+        {
+          emotion: "Happy",
+          intensity: 68,
+          confidence: 95,
+          trend: 0,
+        },
+        {
+          emotion: "Neutral",
+          intensity: 52,
+          confidence: 89,
+          trend: 0,
+        },
+        {
+          emotion: "Anxious",
+          intensity: 31,
+          confidence: 86,
+          trend: 0,
+        },
+      ];
 
   const unreadCount = notificationList.filter(
     (notification) => !notification.read
@@ -316,8 +661,8 @@ function Dashboard() {
                           <div
                             key={notification.id}
                             className={`dashboard-notification-item ${notification.read
-                                ? "dashboard-notification-item--read"
-                                : ""
+                              ? "dashboard-notification-item--read"
+                              : ""
                               }`}
                           >
 
@@ -706,14 +1051,14 @@ function Dashboard() {
                     vectorEffect="non-scaling-stroke"
                   />
 
-                  {dailyWellbeing.map(
+                  {chartData.map(
                     (item, index) => {
 
                       const x =
-                        dailyWellbeing.length === 1
+                        chartData.length === 1
                           ? 50
                           : (index /
-                            (dailyWellbeing.length -
+                            (chartData.length -
                               1)) *
                           100;
 
@@ -739,7 +1084,7 @@ function Dashboard() {
 
                 <div className="dashboard-chart__x-axis">
 
-                  {dailyWellbeing.map((item) => (
+                  {chartData.map((item) => (
                     <span key={item.date}>
                       {item.label}
                     </span>
