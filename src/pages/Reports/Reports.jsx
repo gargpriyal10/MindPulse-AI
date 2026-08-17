@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import Card from "../../components/ui/Card";
+import { getMonitoringSessions } from "../../services/monitoringService";
 
 import "./Reports.css";
 
@@ -222,12 +223,445 @@ const reportData = {
     },
 };
 
+
+function getPeriodStart(period) {
+    const now = new Date();
+    const days =
+        period === "This week"
+            ? 7
+            : period === "This month"
+                ? 30
+                : 90;
+
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - (days - 1));
+
+    return start;
+}
+
+function getCompletedSessions(period) {
+    const sessions = getMonitoringSessions();
+
+    const start = getPeriodStart(period);
+
+    return sessions
+        .filter((session) => {
+            if (session.status !== "Completed") {
+                return false;
+            }
+
+            const dateValue =
+                session.endedAt ||
+                session.startedAt;
+
+            if (!dateValue) {
+                return false;
+            }
+
+            const date = new Date(dateValue);
+
+            return (
+                !Number.isNaN(date.getTime()) &&
+                date >= start
+            );
+        })
+        .sort(
+            (a, b) =>
+                new Date(
+                    b.endedAt || b.startedAt
+                ) -
+                new Date(
+                    a.endedAt || a.startedAt
+                )
+        );
+}
+
+function getSessionEmotionTotals(sessions) {
+    const totals = {
+        Calm: 0,
+        Happy: 0,
+        Neutral: 0,
+        Anxious: 0,
+        Stressed: 0,
+        Sad: 0,
+    };
+
+    sessions.forEach((session) => {
+        const emotions = session.emotions || {};
+
+        const values = Object.entries(totals).map(
+            ([name]) => Number(emotions[name]) || 0
+        );
+
+        const total = values.reduce(
+            (sum, value) => sum + value,
+            0
+        );
+
+        if (total > 0) {
+            Object.keys(totals).forEach((name) => {
+                totals[name] +=
+                    Number(emotions[name]) || 0;
+            });
+            return;
+        }
+
+        if (
+            session.dominantEmotion &&
+            Object.prototype.hasOwnProperty.call(
+                totals,
+                session.dominantEmotion
+            )
+        ) {
+            totals[session.dominantEmotion] += 1;
+        }
+    });
+
+    const total = Object.values(totals).reduce(
+        (sum, value) => sum + value,
+        0
+    );
+
+    if (!total) {
+        return Object.fromEntries(
+            Object.keys(totals).map((name) => [
+                name,
+                0,
+            ])
+        );
+    }
+
+    return Object.fromEntries(
+        Object.entries(totals).map(
+            ([name, value]) => [
+                name,
+                Math.round((value / total) * 100),
+            ]
+        )
+    );
+}
+
+function createEmotionData(sessions) {
+    const totals =
+        getSessionEmotionTotals(sessions);
+
+    const emotionMeta = {
+        Calm: {
+            type: "teal",
+            emoji: "😌",
+        },
+        Happy: {
+            type: "purple",
+            emoji: "😊",
+        },
+        Neutral: {
+            type: "blue",
+            emoji: "😐",
+        },
+        Anxious: {
+            type: "coral",
+            emoji: "😟",
+        },
+        Stressed: {
+            type: "red",
+            emoji: "😣",
+        },
+        Sad: {
+            type: "blue",
+            emoji: "😔",
+        },
+    };
+
+    return Object.entries(totals)
+        .filter(([name]) => name !== "Sad" || totals[name] > 0)
+        .map(([name, value]) => ({
+            name,
+            value,
+            ...emotionMeta[name],
+        }));
+}
+
+function getAverage(sessions, key) {
+    if (!sessions.length) {
+        return 0;
+    }
+
+    const values = sessions
+        .map((session) => Number(session[key]))
+        .filter((value) => Number.isFinite(value));
+
+    if (!values.length) {
+        return 0;
+    }
+
+    return Math.round(
+        values.reduce(
+            (sum, value) => sum + value,
+            0
+        ) / values.length
+    );
+}
+
+function createWeeklyData(sessions, period) {
+    if (!sessions.length) {
+        return reportData[period].weekly;
+    }
+
+    const now = new Date();
+
+    if (period === "This week") {
+        const days = Array.from(
+            { length: 7 },
+            (_, index) => {
+                const date = new Date(now);
+                date.setHours(0, 0, 0, 0);
+                date.setDate(
+                    now.getDate() - (6 - index)
+                );
+                return date;
+            }
+        );
+
+        return days.map((date) => {
+            const daySessions =
+                sessions.filter((session) => {
+                    const sessionDate = new Date(
+                        session.endedAt ||
+                        session.startedAt
+                    );
+
+                    return (
+                        sessionDate.getFullYear() ===
+                        date.getFullYear() &&
+                        sessionDate.getMonth() ===
+                        date.getMonth() &&
+                        sessionDate.getDate() ===
+                        date.getDate()
+                    );
+                });
+
+            return {
+                label: date.toLocaleDateString(
+                    "en-US",
+                    { weekday: "short" }
+                ),
+                score:
+                    getAverage(
+                        daySessions,
+                        "wellbeingScore"
+                    ) || 0,
+            };
+        });
+    }
+
+    if (period === "This month") {
+        return Array.from(
+            { length: 4 },
+            (_, index) => {
+                const end =
+                    index === 3
+                        ? 31
+                        : (index + 1) * 7;
+
+                const start =
+                    index * 7 + 1;
+
+                const weekSessions =
+                    sessions.filter((session) => {
+                        const date = new Date(
+                            session.endedAt ||
+                            session.startedAt
+                        );
+
+                        const day = date.getDate();
+
+                        return (
+                            day >= start &&
+                            day <= end
+                        );
+                    });
+
+                return {
+                    label: `Week ${index + 1}`,
+                    score:
+                        getAverage(
+                            weekSessions,
+                            "wellbeingScore"
+                        ) || 0,
+                };
+            }
+        );
+    }
+
+    const months = [];
+
+    for (let index = 3; index >= 0; index -= 1) {
+        const date = new Date(now);
+        date.setMonth(
+            now.getMonth() - index
+        );
+
+        const monthSessions =
+            sessions.filter((session) => {
+                const sessionDate = new Date(
+                    session.endedAt ||
+                    session.startedAt
+                );
+
+                return (
+                    sessionDate.getFullYear() ===
+                    date.getFullYear() &&
+                    sessionDate.getMonth() ===
+                    date.getMonth()
+                );
+            });
+
+        months.push({
+            label: date.toLocaleDateString(
+                "en-US",
+                { month: "short" }
+            ),
+            score:
+                getAverage(
+                    monthSessions,
+                    "wellbeingScore"
+                ) || 0,
+        });
+    }
+
+    return months;
+}
+
+function buildConnectedReportData(
+    sessions,
+    period
+) {
+    if (!sessions.length) {
+        return reportData[period];
+    }
+
+    const wellbeing =
+        getAverage(
+            sessions,
+            "wellbeingScore"
+        );
+
+    const confidence =
+        getAverage(
+            sessions,
+            "confidence"
+        );
+
+    const duration =
+        getAverage(
+            sessions,
+            "duration"
+        );
+
+    const emotions =
+        createEmotionData(sessions);
+
+    const calm =
+        emotions.find(
+            (emotion) =>
+                emotion.name === "Calm"
+        )?.value || 0;
+
+    const stress =
+        (emotions.find(
+            (emotion) =>
+                emotion.name === "Stressed"
+        )?.value || 0) +
+        (emotions.find(
+            (emotion) =>
+                emotion.name === "Anxious"
+        )?.value || 0);
+
+    const weekly =
+        createWeeklyData(
+            sessions,
+            period
+        );
+
+    const validScores = weekly
+        .map((item) => item.score)
+        .filter((score) => score > 0);
+
+    const average =
+        validScores.length
+            ? Math.round(
+                validScores.reduce(
+                    (sum, score) =>
+                        sum + score,
+                    0
+                ) /
+                validScores.length
+            )
+            : wellbeing;
+
+    const firstScore =
+        validScores[0] || wellbeing;
+
+    const trend =
+        firstScore > 0
+            ? Number(
+                (
+                    ((wellbeing -
+                        firstScore) /
+                        firstScore) *
+                    100
+                ).toFixed(1)
+            )
+            : 0;
+
+    return {
+        summary: {
+            wellbeing,
+            sessions: sessions.length,
+            confidence,
+            duration,
+        },
+
+        weekly,
+
+        emotions,
+
+        balance: {
+            calm,
+            stress,
+        },
+
+        monthly: weekly,
+
+        trend,
+
+        insight:
+            trend >= 0
+                ? "Your recent monitoring sessions show a positive emotional pattern. Continue using regular check-ins to understand how your well-being changes over time."
+                : "Your recent sessions show some changes in emotional balance. Regular check-ins can help you understand these patterns over time.",
+    };
+}
+
 function Reports() {
     const [period, setPeriod] = useState("This week");
     const [showExportToast, setShowExportToast] =
         useState(false);
 
-    const currentData = reportData[period];
+    const monitoringSessions =
+        useMemo(
+            () => getCompletedSessions(period),
+            [period]
+        );
+
+    const currentData = useMemo(
+        () =>
+            buildConnectedReportData(
+                monitoringSessions,
+                period
+            ),
+        [monitoringSessions, period]
+    );
 
     const averageScore = useMemo(() => {
         const total = currentData.weekly.reduce(
