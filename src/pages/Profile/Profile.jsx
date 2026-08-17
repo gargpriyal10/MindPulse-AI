@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import Card from "../../components/ui/Card";
+import { getMonitoringSessions } from "../../services/monitoringService";
 
 import "./Profile.css";
 
@@ -23,14 +24,34 @@ function Profile() {
     const [editing, setEditing] = useState(false);
     const [saved, setSaved] = useState(false);
 
-    const [profile, setProfile] = useState({
+    const defaultProfile = {
         name: "Priyal Garg",
         email: "priyal@example.com",
         location: "India",
         timezone: "IST (UTC +5:30)",
+    };
+
+    const [profile, setProfile] = useState(() => {
+        try {
+            const stored = localStorage.getItem(
+                "mindpulse_profile"
+            );
+
+            return stored
+                ? { ...defaultProfile, ...JSON.parse(stored) }
+                : defaultProfile;
+        } catch (error) {
+            console.error(
+                "Unable to load profile:",
+                error
+            );
+
+            return defaultProfile;
+        }
     });
 
-    const [draftProfile, setDraftProfile] = useState(profile);
+    const [draftProfile, setDraftProfile] =
+        useState(profile);
 
     const handleEdit = () => {
         setDraftProfile(profile);
@@ -51,6 +72,12 @@ function Profile() {
 
     const handleSave = () => {
         setProfile(draftProfile);
+
+        localStorage.setItem(
+            "mindpulse_profile",
+            JSON.stringify(draftProfile)
+        );
+
         setEditing(false);
         setSaved(true);
 
@@ -58,6 +85,56 @@ function Profile() {
             setSaved(false);
         }, 3000);
     };
+
+    const monitoringSessions =
+        getMonitoringSessions().filter(
+            (session) =>
+                session.status === "Completed"
+        );
+
+    const sessionCount =
+        monitoringSessions.length;
+
+    const averageWellbeing =
+        sessionCount > 0
+            ? Math.round(
+                monitoringSessions.reduce(
+                    (sum, session) =>
+                        sum +
+                        (Number(
+                            session.wellbeingScore
+                        ) || 0),
+                    0
+                ) / sessionCount
+            )
+            : 84;
+
+    const averageConfidence =
+        sessionCount > 0
+            ? Math.round(
+                monitoringSessions.reduce(
+                    (sum, session) =>
+                        sum +
+                        (Number(
+                            session.confidence
+                        ) || 0),
+                    0
+                ) / sessionCount
+            )
+            : 93;
+
+    const totalMinutes =
+        monitoringSessions.reduce(
+            (sum, session) =>
+                sum +
+                (Number(session.duration) || 0),
+            0
+        );
+
+    const monitoringHours =
+        sessionCount > 0
+            ? (totalMinutes / 60).toFixed(1)
+            : "8.4";
 
     return (
         <main className="profile-page">
@@ -361,7 +438,7 @@ function Profile() {
                                 </div>
 
                                 <div>
-                                    <strong>84</strong>
+                                    <strong>{averageWellbeing}</strong>
                                     <span>Well-being score</span>
                                 </div>
 
@@ -374,7 +451,7 @@ function Profile() {
                                 </div>
 
                                 <div>
-                                    <strong>28</strong>
+                                    <strong>{sessionCount || 28}</strong>
                                     <span>Total sessions</span>
                                 </div>
 
@@ -387,7 +464,7 @@ function Profile() {
                                 </div>
 
                                 <div>
-                                    <strong>93%</strong>
+                                    <strong>{averageConfidence}%</strong>
                                     <span>AI confidence</span>
                                 </div>
 
@@ -400,7 +477,7 @@ function Profile() {
                                 </div>
 
                                 <div>
-                                    <strong>8.4h</strong>
+                                    <strong>{monitoringHours}h</strong>
                                     <span>Monitoring time</span>
                                 </div>
 
@@ -516,11 +593,11 @@ function Profile() {
 
                 <footer className="profile-footer">
                     <span>
-                        MindPulse AI • Personal account
+                        MindPulse AI â€¢ Personal account
                     </span>
 
                     <span>
-                        Privacy-first • Human-centric
+                        Privacy-first â€¢ Human-centric
                     </span>
                 </footer>
             </section>

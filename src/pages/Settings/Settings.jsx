@@ -15,11 +15,12 @@ import {
 } from "lucide-react";
 
 import Card from "../../components/ui/Card";
+import { clearMonitoringSessions } from "../../services/monitoringService";
 
 import "./Settings.css";
 
 function Settings() {
-    const [settings, setSettings] = useState({
+    const defaultSettings = {
         notifications: true,
         sessionReminders: true,
         weeklyReports: true,
@@ -27,6 +28,29 @@ function Settings() {
         autoStartCamera: false,
         saveHistory: true,
         anonymousAnalytics: false,
+    };
+
+    const [settings, setSettings] = useState(() => {
+        try {
+            const stored =
+                localStorage.getItem(
+                    "mindpulse_settings"
+                );
+
+            return stored
+                ? {
+                    ...defaultSettings,
+                    ...JSON.parse(stored),
+                }
+                : defaultSettings;
+        } catch (error) {
+            console.error(
+                "Unable to load settings:",
+                error
+            );
+
+            return defaultSettings;
+        }
     });
 
     const [saved, setSaved] = useState(false);
@@ -41,11 +65,40 @@ function Settings() {
     };
 
     const saveSettings = () => {
+        localStorage.setItem(
+            "mindpulse_settings",
+            JSON.stringify(settings)
+        );
+
         setSaved(true);
 
         setTimeout(() => {
             setSaved(false);
         }, 2500);
+    };
+
+    const handleDeleteLocalData = () => {
+        const confirmed =
+            window.confirm(
+                "This will remove your locally stored profile, settings, and monitoring history from this browser. Continue?"
+            );
+
+        if (!confirmed) {
+            return;
+        }
+
+        clearMonitoringSessions();
+
+        localStorage.removeItem(
+            "mindpulse_profile"
+        );
+
+        localStorage.removeItem(
+            "mindpulse_settings"
+        );
+
+        window.location.href =
+            "/profile";
     };
 
     return (
@@ -325,7 +378,7 @@ function Settings() {
                         <h2>Account actions</h2>
 
                         <p>
-                            Manage your profile and account data.
+                            Manage your profile and locally stored account data.
                         </p>
                     </div>
 
@@ -336,9 +389,12 @@ function Settings() {
                             <ChevronRight size={14} />
                         </a>
 
-                        <button type="button">
+                        <button
+                            type="button"
+                            onClick={handleDeleteLocalData}
+                        >
                             <Trash2 size={15} />
-                            Delete account
+                            Delete local data
                             <ChevronRight size={14} />
                         </button>
                     </div>
