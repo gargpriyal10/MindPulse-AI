@@ -4,11 +4,9 @@
   display: flex;
 
   background:
-    radial-gradient(
-      circle at 70% 0%,
+    radial-gradient(circle at 70% 0%,
       rgba(20, 184, 166, 0.035),
-      transparent 28%
-    ),
+      transparent 28%),
     #080e14;
 
   color: #f8fafc;
@@ -340,7 +338,7 @@
   border-radius: 0.55rem;
 }
 
-.monitoring-session-bar__left > div:last-child {
+.monitoring-session-bar__left>div:last-child {
   display: flex;
   flex-direction: column;
 
@@ -487,17 +485,13 @@
 .monitoring-camera {
   position: relative;
 
-  height: 350px;
+  width: 100%;
+  min-height: 420px;
 
   overflow: hidden;
 
-  background:
-    radial-gradient(
-      ellipse at center,
-      rgba(20, 184, 166, 0.06),
-      transparent 50%
-    ),
-    #050a0f;
+  background: #050a0f;
+  border-radius: 0.9rem;
 }
 
 .monitoring-camera__grid {
@@ -507,15 +501,11 @@
   opacity: 0.35;
 
   background-image:
-    linear-gradient(
+    linear-gradient(rgba(20, 184, 166, 0.045) 1px,
+      transparent 1px),
+    linear-gradient(90deg,
       rgba(20, 184, 166, 0.045) 1px,
-      transparent 1px
-    ),
-    linear-gradient(
-      90deg,
-      rgba(20, 184, 166, 0.045) 1px,
-      transparent 1px
-    );
+      transparent 1px);
 
   background-size: 40px 40px;
 }
@@ -712,7 +702,7 @@
   bottom: 0.8rem;
 }
 
-.monitoring-camera__bottom > span {
+.monitoring-camera__bottom>span {
   display: flex;
   align-items: center;
 
@@ -744,7 +734,7 @@
   backdrop-filter: blur(5px);
 }
 
-.monitoring-camera__ended > div,
+.monitoring-camera__ended>div,
 .monitoring-camera__paused {
   display: flex;
   flex-direction: column;
@@ -872,7 +862,7 @@
   border-radius: 50%;
 }
 
-.monitoring-current-emotion__orb > div {
+.monitoring-current-emotion__orb>div {
   position: absolute;
 
   inset: -9px;
@@ -940,11 +930,9 @@
 
   height: 100%;
 
-  background: linear-gradient(
-    90deg,
-    #0d9488,
-    #14b8a6
-  );
+  background: linear-gradient(90deg,
+      #0d9488,
+      #14b8a6);
 
   border-radius: inherit;
 
@@ -963,7 +951,7 @@
   margin-top: 1.2rem;
 }
 
-.monitoring-emotion-stats > div {
+.monitoring-emotion-stats>div {
   display: flex;
   flex-direction: column;
 
@@ -1008,7 +996,7 @@
   margin-bottom: 0.9rem;
 }
 
-.monitoring-section-header > div:first-child > span {
+.monitoring-section-header>div:first-child>span {
   color: #14b8a6;
 
   font-size: 0.54rem;
@@ -1088,7 +1076,7 @@
   gap: 0.5rem;
 }
 
-.monitoring-signal-card__emotion > span {
+.monitoring-signal-card__emotion>span {
   font-size: 1.1rem;
 }
 
@@ -1096,7 +1084,7 @@
   color: #cbd5e1;
 }
 
-.monitoring-signal-card__top > strong {
+.monitoring-signal-card__top>strong {
   color: #14b8a6;
 }
 
@@ -1122,15 +1110,11 @@
   transition: width 800ms ease;
 }
 
-.monitoring-signal-card--lavender
-  .monitoring-signal-card__track
-  span {
+.monitoring-signal-card--lavender .monitoring-signal-card__track span {
   background: #c084fc;
 }
 
-.monitoring-signal-card--coral
-  .monitoring-signal-card__track
-  span {
+.monitoring-signal-card--coral .monitoring-signal-card__track span {
   background: #fb7185;
 }
 
@@ -1199,7 +1183,7 @@
   font-size: 0.86rem;
 }
 
-.monitoring-observation > p {
+.monitoring-observation>p {
   margin: 1rem 0;
 
   color: #718096;
@@ -1306,16 +1290,14 @@
   width: 84%;
   height: 100%;
 
-  background: linear-gradient(
-    90deg,
-    #0d9488,
-    #14b8a6
-  );
+  background: linear-gradient(90deg,
+      #0d9488,
+      #14b8a6);
 
   border-radius: inherit;
 }
 
-.monitoring-wellbeing > p {
+.monitoring-wellbeing>p {
   margin: 0.7rem 0 1rem;
 
   color: #718096;
@@ -1376,6 +1358,7 @@
    ============================================================ */
 
 @keyframes monitoring-status-pulse {
+
   0%,
   100% {
     opacity: 1;
@@ -1389,6 +1372,7 @@
 }
 
 @keyframes monitoring-orb {
+
   0%,
   100% {
     transform: scale(0.98);
@@ -1516,7 +1500,7 @@
     flex-shrink: 0;
   }
 
-  .monitoring-header__status > span:nth-child(2) {
+  .monitoring-header__status>span:nth-child(2) {
     display: none;
   }
 
@@ -1549,4 +1533,82 @@
 
     flex-direction: column;
   }
+}
+
+/* ============================================================
+   REAL WEBCAM VIDEO
+============================================================ */
+
+.monitoring-camera__video {
+  position: absolute;
+
+  inset: 0;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  display: block;
+
+  transform: scaleX(-1);
+
+  background: #050a0f;
+
+  z-index: 1;
+}
+
+/* Keep camera labels above the video */
+
+.monitoring-camera__top,
+.monitoring-camera__bottom {
+  position: absolute;
+  z-index: 5;
+}
+
+.monitoring-camera__paused {
+  z-index: 10;
+}
+
+.monitoring-camera-error {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 0.75rem;
+
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+
+  color: #fecdd3;
+
+  background: rgba(225, 29, 72, 0.08);
+
+  border: 1px solid rgba(225, 29, 72, 0.2);
+  border-radius: 0.8rem;
+}
+
+.monitoring-camera-error svg {
+  flex-shrink: 0;
+
+  margin-top: 0.1rem;
+
+  color: #fb7185;
+}
+
+.monitoring-camera-error div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 0.2rem;
+}
+
+.monitoring-camera-error strong {
+  font-size: 0.75rem;
+}
+
+.monitoring-camera-error span {
+  color: #a8b3c2;
+
+  font-size: 0.7rem;
+  line-height: 1.45;
 }
