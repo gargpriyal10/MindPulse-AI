@@ -1,9 +1,11 @@
+import { useState } from "react";
 import {
   Activity,
   ArrowRight,
   Bell,
   Brain,
   CalendarDays,
+  Check,
   ChevronRight,
   Clock3,
   HeartPulse,
@@ -11,6 +13,7 @@ import {
   ShieldCheck,
   Sparkles,
   TrendingUp,
+  X,
 } from "lucide-react";
 
 import Button from "../../components/ui/Button";
@@ -25,14 +28,17 @@ import {
   sessionHistory,
   dailyWellbeing,
   wellbeingInsights,
+  notifications,
 } from "../../services/mockData";
 
 import "./Dashboard.css";
 
 function Dashboard() {
-  /* ============================================================
-     DASHBOARD DATA
-  ============================================================ */
+  const [showNotifications, setShowNotifications] =
+    useState(false);
+
+  const [notificationList, setNotificationList] =
+    useState(notifications);
 
   const emotionData = recentEmotions
     .slice(0, 4)
@@ -82,12 +88,24 @@ function Dashboard() {
     })
     .join(" ");
 
-  const latestInsight =
-    wellbeingInsights[0];
+  const latestInsight = wellbeingInsights[0];
 
-  /* ============================================================
-     RENDER
-  ============================================================ */
+  const unreadCount = notificationList.filter(
+    (notification) => !notification.read
+  ).length;
+
+  const markAllAsRead = () => {
+    setNotificationList((current) =>
+      current.map((notification) => ({
+        ...notification,
+        read: true,
+      }))
+    );
+  };
+
+  const closeNotifications = () => {
+    setShowNotifications(false);
+  };
 
   return (
     <main className="dashboard-page">
@@ -227,14 +245,131 @@ function Dashboard() {
 
           <div className="dashboard-header__actions">
 
-            <button
-              type="button"
-              className="dashboard-notification"
-              aria-label="Notifications"
-            >
-              <Bell size={18} />
-              <span />
-            </button>
+            {/* =================================================
+                NOTIFICATION
+            ================================================= */}
+
+            <div className="dashboard-notification-wrapper">
+
+              <button
+                type="button"
+                className="dashboard-notification"
+                aria-label="Notifications"
+                aria-expanded={showNotifications}
+                onClick={() =>
+                  setShowNotifications(
+                    (current) => !current
+                  )
+                }
+              >
+                <Bell size={18} />
+
+                {unreadCount > 0 && (
+                  <span className="dashboard-notification__badge">
+                    {unreadCount > 9
+                      ? "9+"
+                      : unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="dashboard-notification-panel">
+
+                  <div className="dashboard-notification-panel__header">
+
+                    <div>
+                      <strong>
+                        Notifications
+                      </strong>
+
+                      <span>
+                        {unreadCount > 0
+                          ? `${unreadCount} unread`
+                          : "All caught up"}
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={closeNotifications}
+                      aria-label="Close notifications"
+                    >
+                      <X size={15} />
+                    </button>
+
+                  </div>
+
+                  <div className="dashboard-notification-panel__list">
+
+                    {notificationList.length === 0 ? (
+                      <div className="dashboard-notification-empty">
+                        <Bell size={20} />
+
+                        <span>
+                          No notifications
+                        </span>
+                      </div>
+                    ) : (
+                      notificationList.map(
+                        (notification) => (
+                          <div
+                            key={notification.id}
+                            className={`dashboard-notification-item ${notification.read
+                                ? "dashboard-notification-item--read"
+                                : ""
+                              }`}
+                          >
+
+                            <div className="dashboard-notification-item__icon">
+                              <Bell size={14} />
+                            </div>
+
+                            <div className="dashboard-notification-item__content">
+
+                              <strong>
+                                {notification.title}
+                              </strong>
+
+                              <p>
+                                {notification.message ||
+                                  notification.description}
+                              </p>
+
+                              <small>
+                                {notification.time ||
+                                  notification.date ||
+                                  "Recently"}
+                              </small>
+
+                            </div>
+
+                            {!notification.read && (
+                              <span className="dashboard-notification-item__dot" />
+                            )}
+
+                          </div>
+                        )
+                      )
+                    )}
+
+                  </div>
+
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      className="dashboard-notification-panel__read-all"
+                      onClick={markAllAsRead}
+                    >
+                      <Check size={14} />
+                      Mark all as read
+                    </button>
+                  )}
+
+                </div>
+              )}
+
+            </div>
 
             <div className="dashboard-avatar">
               PG
@@ -307,8 +442,6 @@ function Dashboard() {
 
         <section className="dashboard-metrics">
 
-          {/* WELL-BEING */}
-
           <Card
             className="dashboard-metric-card"
             padding="medium"
@@ -370,8 +503,6 @@ function Dashboard() {
 
           </Card>
 
-          {/* TOTAL SESSIONS */}
-
           <Card
             className="dashboard-metric-card"
             padding="medium"
@@ -391,6 +522,7 @@ function Dashboard() {
 
               <small>
                 <TrendingUp size={12} />
+
                 {dashboardOverview.sessionsThisWeek}
                 {" "}this week
               </small>
@@ -398,8 +530,6 @@ function Dashboard() {
             </div>
 
           </Card>
-
-          {/* DOMINANT EMOTION */}
 
           <Card
             className="dashboard-metric-card"
@@ -426,8 +556,6 @@ function Dashboard() {
             </div>
 
           </Card>
-
-          {/* CONFIDENCE */}
 
           <Card
             className="dashboard-metric-card"
@@ -457,7 +585,7 @@ function Dashboard() {
         </section>
 
         {/* =================================================
-            EMOTION OVERVIEW
+            EMOTIONAL SNAPSHOT
         ================================================= */}
 
         <section className="dashboard-section">
@@ -624,8 +752,6 @@ function Dashboard() {
             </div>
 
           </ChartContainer>
-
-          {/* AI INSIGHT */}
 
           <Card
             className="dashboard-insight"

@@ -4,11 +4,9 @@
   display: flex;
 
   background:
-    radial-gradient(
-      circle at 70% 0%,
+    radial-gradient(circle at 70% 0%,
       rgba(20, 184, 166, 0.035),
-      transparent 28%
-    ),
+      transparent 28%),
     #080e14;
 
   color: #f8fafc;
@@ -158,7 +156,7 @@
   border-radius: 0.75rem;
 }
 
-.dashboard-sidebar__tip > svg {
+.dashboard-sidebar__tip>svg {
   flex-shrink: 0;
 
   margin-top: 0.1rem;
@@ -338,11 +336,9 @@
   padding: 1.6rem 2rem;
 
   background:
-    linear-gradient(
-      110deg,
+    linear-gradient(110deg,
       rgba(13, 148, 136, 0.11),
-      rgba(15, 23, 42, 0.72) 65%
-    );
+      rgba(15, 23, 42, 0.72) 65%);
 
   border: 1px solid rgba(20, 184, 166, 0.15);
 
@@ -578,14 +574,14 @@
   background: rgba(96, 165, 250, 0.08);
 }
 
-.dashboard-metric-card > div:nth-child(2) {
+.dashboard-metric-card>div:nth-child(2) {
   min-width: 0;
 
   display: flex;
   flex-direction: column;
 }
 
-.dashboard-metric-card > div:nth-child(2) > span {
+.dashboard-metric-card>div:nth-child(2)>span {
   color: #64748b;
 
   font-size: 0.61rem;
@@ -634,7 +630,7 @@
   height: 100%;
 }
 
-.dashboard-metric__ring > span {
+.dashboard-metric__ring>span {
   position: absolute;
 
   inset: 0;
@@ -694,7 +690,7 @@
   font-size: 0.64rem;
 }
 
-.dashboard-section__header > a {
+.dashboard-section__header>a {
   display: flex;
   align-items: center;
 
@@ -902,7 +898,7 @@
   font-size: 0.6rem;
 }
 
-.dashboard-insight > a {
+.dashboard-insight>a {
   position: relative;
   z-index: 2;
 
@@ -957,6 +953,7 @@
    ============================================================ */
 
 @keyframes dashboard-pulse {
+
   0%,
   100% {
     transform: scale(0.95);
@@ -972,6 +969,7 @@
 }
 
 @keyframes dashboard-float {
+
   0%,
   100% {
     transform: translateY(0);
@@ -1146,7 +1144,7 @@
     align-items: flex-start;
   }
 
-  .dashboard-section__header > a {
+  .dashboard-section__header>a {
     flex-shrink: 0;
   }
 
@@ -1154,5 +1152,272 @@
     flex-direction: column;
 
     align-items: flex-start;
+  }
+}
+
+/* ============================================================
+   NOTIFICATIONS
+============================================================ */
+
+.dashboard-notification-wrapper {
+  position: relative;
+}
+
+.dashboard-notification {
+  position: relative;
+}
+
+.dashboard-notification__badge {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+
+  min-width: 16px;
+  height: 16px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 4px;
+
+  color: #ffffff;
+  background: #14b8a6;
+
+  border: 2px solid #080e14;
+  border-radius: 999px;
+
+  font-size: 0.58rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.dashboard-notification-panel {
+  position: absolute;
+  top: calc(100% + 0.8rem);
+  right: 0;
+
+  z-index: 100;
+
+  width: min(360px, calc(100vw - 2rem));
+
+  overflow: hidden;
+
+  background: #0f1720;
+
+  border: 1px solid rgba(20, 184, 166, 0.16);
+  border-radius: 1rem;
+
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.35),
+    0 0 30px rgba(20, 184, 166, 0.05);
+
+  animation: notificationPanelIn 160ms ease;
+}
+
+@keyframes notificationPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-notification-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 1rem 1rem 0.85rem;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dashboard-notification-panel__header>div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.dashboard-notification-panel__header strong {
+  color: #f8fafc;
+
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.dashboard-notification-panel__header span {
+  color: #64748b;
+
+  font-size: 0.68rem;
+}
+
+.dashboard-notification-panel__header button {
+  width: 28px;
+  height: 28px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #64748b;
+  background: transparent;
+
+  border: 0;
+  border-radius: 0.5rem;
+
+  cursor: pointer;
+}
+
+.dashboard-notification-panel__header button:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dashboard-notification-panel__list {
+  max-height: 330px;
+
+  overflow-y: auto;
+}
+
+.dashboard-notification-item {
+  position: relative;
+
+  display: flex;
+  align-items: flex-start;
+
+  gap: 0.75rem;
+
+  padding: 0.9rem 1rem;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.045);
+
+  transition: background 160ms ease;
+}
+
+.dashboard-notification-item:hover {
+  background: rgba(20, 184, 166, 0.045);
+}
+
+.dashboard-notification-item--read {
+  opacity: 0.62;
+}
+
+.dashboard-notification-item__icon {
+  flex-shrink: 0;
+
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #14b8a6;
+  background: rgba(20, 184, 166, 0.08);
+
+  border: 1px solid rgba(20, 184, 166, 0.12);
+  border-radius: 0.55rem;
+}
+
+.dashboard-notification-item__content {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.22rem;
+}
+
+.dashboard-notification-item__content strong {
+  color: #e2e8f0;
+
+  font-size: 0.75rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.dashboard-notification-item__content p {
+  margin: 0;
+
+  color: #7f8da0;
+
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+.dashboard-notification-item__content small {
+  color: #526074;
+
+  font-size: 0.58rem;
+}
+
+.dashboard-notification-item__dot {
+  flex-shrink: 0;
+
+  width: 6px;
+  height: 6px;
+
+  margin-top: 0.35rem;
+
+  background: #14b8a6;
+  border-radius: 50%;
+}
+
+.dashboard-notification-panel__read-all {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.4rem;
+
+  padding: 0.8rem;
+
+  color: #14b8a6;
+  background: transparent;
+
+  border: 0;
+
+  font-size: 0.68rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background 160ms ease;
+}
+
+.dashboard-notification-panel__read-all:hover {
+  background: rgba(20, 184, 166, 0.06);
+}
+
+.dashboard-notification-empty {
+  min-height: 150px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.55rem;
+
+  color: #64748b;
+
+  font-size: 0.72rem;
+}
+
+@media (max-width: 640px) {
+  .dashboard-notification-panel {
+    position: fixed;
+
+    top: 4.5rem;
+    right: 1rem;
+    left: 1rem;
+
+    width: auto;
   }
 }
