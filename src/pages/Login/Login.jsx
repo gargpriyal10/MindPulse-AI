@@ -21,56 +21,158 @@ function Login() {
     password: "",
   });
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] =
+    useState(false);
+
+  const [rememberMe, setRememberMe] =
+    useState(false);
+
+  const [isLoading, setIsLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [message, setMessage] =
+    useState("");
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
+    const { name, value } =
+      event.target;
 
     setFormData((previous) => ({
       ...previous,
       [name]: value,
     }));
+
+    setError("");
+    setMessage("");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!formData.email || !formData.password) {
+    setError("");
+    setMessage("");
+
+    const email =
+      formData.email.trim();
+
+    const password =
+      formData.password;
+
+    /* =====================================================
+       FRONTEND VALIDATION
+    ===================================================== */
+
+    if (!email || !password) {
+      setError(
+        "Please enter your email and password."
+      );
+
       return;
     }
 
+    if (!email.includes("@")) {
+      setError(
+        "Please enter a valid email address."
+      );
+
+      return;
+    }
+
+    if (password.length < 6) {
+      setError(
+        "Password must contain at least 6 characters."
+      );
+
+      return;
+    }
+
+    /* =====================================================
+       FRONTEND-ONLY LOGIN
+       
+       This will later be replaced by the backend API.
+    ===================================================== */
+
     setIsLoading(true);
 
-    /*
-     * Frontend-only mock login.
-     * Real authentication will later be connected
-     * through the API service abstraction.
-     */
     await new Promise((resolve) =>
-      setTimeout(resolve, 900)
+      setTimeout(resolve, 700)
+    );
+
+    const user = {
+      name: email
+        .split("@")[0]
+        .replace(/[._-]/g, " ")
+        .replace(/\b\w/g, (letter) =>
+          letter.toUpperCase()
+        ),
+
+      email,
+
+      loginTime:
+        new Date().toISOString(),
+    };
+
+    /*
+     * Store the frontend authentication state.
+     */
+
+    localStorage.setItem(
+      "mindpulse_auth",
+      JSON.stringify({
+        authenticated: true,
+        rememberMe,
+        loginTime:
+          new Date().toISOString(),
+      })
+    );
+
+    localStorage.setItem(
+      "mindpulse_user",
+      JSON.stringify(user)
     );
 
     setIsLoading(false);
 
-    console.log("Mock login:", {
-      ...formData,
-      rememberMe,
-    });
+    /*
+     * Navigate to Dashboard.
+     */
+
+    window.location.href =
+      "/dashboard";
+  };
+
+  const handleForgotPassword = () => {
+    setError("");
+
+    setMessage(
+      "Password recovery will be available when the backend authentication service is connected."
+    );
   };
 
   return (
     <main className="login-page">
-      {/* Background decoration */}
+
+      {/* =====================================================
+          BACKGROUND DECORATION
+      ===================================================== */}
 
       <div className="login-page__glow login-page__glow--one" />
+
       <div className="login-page__glow login-page__glow--two" />
 
-      {/* Top navigation */}
+      {/* =====================================================
+          TOP NAVIGATION
+      ===================================================== */}
 
       <header className="login-header">
-        <a href="/" className="login-brand">
+
+        <a
+          href="/"
+          className="login-brand"
+        >
           <span className="login-brand__icon">
             <Brain size={20} />
           </span>
@@ -80,16 +182,28 @@ function Login() {
           </span>
         </a>
 
-        <a href="/" className="login-back">
+        <a
+          href="/"
+          className="login-back"
+        >
           <ArrowLeft size={15} />
           Back to home
         </a>
+
       </header>
 
+      {/* =====================================================
+          CONTENT
+      ===================================================== */}
+
       <section className="login-content">
-        {/* Left information panel */}
+
+        {/* =================================================
+            LEFT INFORMATION PANEL
+        ================================================= */}
 
         <div className="login-intro">
+
           <div className="login-intro__badge">
             <Sparkles size={14} />
             Your emotional journey continues
@@ -102,52 +216,72 @@ function Login() {
 
           <p>
             Pick up where you left off and continue
-            understanding your emotional well-being with
-            MindPulse AI.
+            understanding your emotional well-being
+            with MindPulse AI.
           </p>
 
           <div className="login-intro__features">
+
             <div>
+
               <span>
                 <ShieldCheck size={17} />
               </span>
 
               <div>
-                <strong>Privacy-first</strong>
+                <strong>
+                  Privacy-first
+                </strong>
+
                 <small>
                   Your emotional data stays protected.
                 </small>
               </div>
+
             </div>
 
             <div>
+
               <span>
                 <LockKeyhole size={17} />
               </span>
 
               <div>
-                <strong>Secure sessions</strong>
+                <strong>
+                  Secure sessions
+                </strong>
+
                 <small>
-                  Designed with your personal privacy in mind.
+                  Designed with your personal privacy
+                  in mind.
                 </small>
               </div>
+
             </div>
+
           </div>
 
           <div className="login-intro__quote">
+
             <span>“</span>
 
             <p>
-              Awareness is the first step toward meaningful
-              change.
+              Awareness is the first step toward
+              meaningful change.
             </p>
+
           </div>
+
         </div>
 
-        {/* Login form */}
+        {/* =================================================
+            LOGIN CARD
+        ================================================= */}
 
         <div className="login-card">
+
           <div className="login-card__header">
+
             <div className="login-card__mobile-icon">
               <Brain size={21} />
             </div>
@@ -156,26 +290,82 @@ function Login() {
               ACCOUNT ACCESS
             </span>
 
-            <h2>Sign in to MindPulse</h2>
+            <h2>
+              Sign in to MindPulse
+            </h2>
 
             <p>
               Enter your details to access your
               well-being dashboard.
             </p>
+
           </div>
+
+          {/* =================================================
+              ERROR MESSAGE
+          ================================================= */}
+
+          {error && (
+            <div
+              role="alert"
+              style={{
+                marginBottom: "16px",
+                padding: "12px 14px",
+                borderRadius: "10px",
+                background:
+                  "rgba(239, 68, 68, 0.10)",
+                border:
+                  "1px solid rgba(239, 68, 68, 0.25)",
+                color: "#FCA5A5",
+                fontSize: "13px",
+                lineHeight: "1.5",
+              }}
+            >
+              {error}
+            </div>
+          )}
+
+          {/* =================================================
+              INFORMATION MESSAGE
+          ================================================= */}
+
+          {message && (
+            <div
+              role="status"
+              style={{
+                marginBottom: "16px",
+                padding: "12px 14px",
+                borderRadius: "10px",
+                background:
+                  "rgba(20, 184, 166, 0.10)",
+                border:
+                  "1px solid rgba(20, 184, 166, 0.25)",
+                color: "#99F6E4",
+                fontSize: "13px",
+                lineHeight: "1.5",
+              }}
+            >
+              {message}
+            </div>
+          )}
 
           <form
             className="login-form"
             onSubmit={handleSubmit}
           >
-            {/* Email */}
+
+            {/* =================================================
+                EMAIL
+            ================================================= */}
 
             <div className="login-field">
+
               <label htmlFor="email">
                 Email address
               </label>
 
               <div className="login-input-wrapper">
+
                 <Mail size={17} />
 
                 <input
@@ -188,13 +378,19 @@ function Login() {
                   autoComplete="email"
                   required
                 />
+
               </div>
+
             </div>
 
-            {/* Password */}
+            {/* =================================================
+                PASSWORD
+            ================================================= */}
 
             <div className="login-field">
+
               <div className="login-label-row">
+
                 <label htmlFor="password">
                   Password
                 </label>
@@ -202,17 +398,17 @@ function Login() {
                 <button
                   type="button"
                   className="login-forgot"
-                  onClick={() => {
-                    console.log(
-                      "Forgot password selected"
-                    );
-                  }}
+                  onClick={
+                    handleForgotPassword
+                  }
                 >
                   Forgot password?
                 </button>
+
               </div>
 
               <div className="login-input-wrapper">
+
                 <LockKeyhole size={17} />
 
                 <input
@@ -235,7 +431,8 @@ function Login() {
                   className="login-password-toggle"
                   onClick={() =>
                     setShowPassword(
-                      (previous) => !previous
+                      (previous) =>
+                        !previous
                     )
                   }
                   aria-label={
@@ -250,12 +447,17 @@ function Login() {
                     <Eye size={17} />
                   )}
                 </button>
+
               </div>
+
             </div>
 
-            {/* Remember me */}
+            {/* =================================================
+                REMEMBER ME
+            ================================================= */}
 
             <label className="login-checkbox">
+
               <input
                 type="checkbox"
                 checked={rememberMe}
@@ -271,19 +473,27 @@ function Login() {
               <span>
                 Remember me
               </span>
+
             </label>
 
-            {/* Submit */}
+            {/* =================================================
+                SUBMIT
+            ================================================= */}
 
             <Button
               type="submit"
               fullWidth
               size="large"
               loading={isLoading}
-              icon={!isLoading && <ArrowRight size={17} />}
+              icon={
+                !isLoading && (
+                  <ArrowRight size={17} />
+                )
+              }
             >
               Sign In
             </Button>
+
           </form>
 
           <div className="login-divider">
@@ -291,26 +501,43 @@ function Login() {
           </div>
 
           <p className="login-register">
+
             Don't have an account?
+
             <a href="/register">
               Create an account
             </a>
+
           </p>
 
           <div className="login-security">
+
             <ShieldCheck size={14} />
+
             <span>
               Secure & privacy-conscious experience
             </span>
+
           </div>
+
         </div>
+
       </section>
 
+      {/* =====================================================
+          FOOTER
+      ===================================================== */}
+
       <footer className="login-footer">
+
         © 2026 MindPulse AI
+
         <span>•</span>
+
         Emotion Recognition & Well-being Monitoring
+
       </footer>
+
     </main>
   );
 }

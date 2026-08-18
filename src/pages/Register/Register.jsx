@@ -35,6 +35,8 @@ function Register() {
 
     const [agreeToTerms, setAgreeToTerms] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
 
     const handleChange = (event) => {
         const { name, value } = event.target;
@@ -43,6 +45,9 @@ function Register() {
             ...previous,
             [name]: value,
         }));
+
+        setError("");
+        setSuccess("");
     };
 
     const passwordsMatch =
@@ -59,28 +64,109 @@ function Register() {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        setError("");
+        setSuccess("");
+
         if (!isFormValid) {
+            setError(
+                "Please complete all required fields and accept the terms."
+            );
+            return;
+        }
+
+        const name = formData.name.trim();
+        const email = formData.email.trim().toLowerCase();
+
+        if (formData.password.length < 6) {
+            setError(
+                "Password must contain at least 6 characters."
+            );
+            return;
+        }
+
+        if (!email.includes("@")) {
+            setError(
+                "Please enter a valid email address."
+            );
             return;
         }
 
         setIsLoading(true);
 
         /*
-         * Frontend-only mock registration.
-         * Real registration will later use services/api.js.
+         * Frontend-only registration.
+         * Real registration will later be connected to the backend API.
          */
 
         await new Promise((resolve) =>
-            setTimeout(resolve, 1000)
+            setTimeout(resolve, 700)
         );
 
-        setIsLoading(false);
+        try {
+            const existingUsers = JSON.parse(
+                localStorage.getItem(
+                    "mindpulse_registered_users"
+                ) || "[]"
+            );
 
-        console.log("Mock registration:", formData);
+            const alreadyRegistered =
+                existingUsers.some(
+                    (user) =>
+                        user.email.toLowerCase() === email
+                );
 
-        alert("Account created successfully!");
+            if (alreadyRegistered) {
+                setError(
+                    "An account with this email already exists. Please sign in instead."
+                );
+                setIsLoading(false);
+                return;
+            }
 
-        navigate("/login");
+            const newUser = {
+                id: `user-${Date.now()}`,
+                name,
+                email,
+                createdAt: new Date().toISOString(),
+            };
+
+            localStorage.setItem(
+                "mindpulse_registered_users",
+                JSON.stringify([
+                    ...existingUsers,
+                    newUser,
+                ])
+            );
+
+            localStorage.setItem(
+                "mindpulse_profile",
+                JSON.stringify({
+                    name,
+                    email,
+                    location: "India",
+                    timezone: "IST (UTC +5:30)",
+                })
+            );
+
+            setIsLoading(false);
+            setSuccess(
+                "Account created successfully. Redirecting to sign in..."
+            );
+
+            setTimeout(() => {
+                navigate("/login");
+            }, 900);
+        } catch (registrationError) {
+            console.error(
+                "Frontend registration failed:",
+                registrationError
+            );
+
+            setIsLoading(false);
+            setError(
+                "Unable to create the account right now. Please try again."
+            );
+        }
     };
 
     return (
@@ -220,6 +306,46 @@ function Register() {
                             It only takes a moment to create your account.
                         </p>
                     </div>
+
+                    {error && (
+                        <div
+                            role="alert"
+                            style={{
+                                marginBottom: "16px",
+                                padding: "12px 14px",
+                                borderRadius: "10px",
+                                background:
+                                    "rgba(239, 68, 68, 0.10)",
+                                border:
+                                    "1px solid rgba(239, 68, 68, 0.25)",
+                                color: "#FCA5A5",
+                                fontSize: "13px",
+                                lineHeight: "1.5",
+                            }}
+                        >
+                            {error}
+                        </div>
+                    )}
+
+                    {success && (
+                        <div
+                            role="status"
+                            style={{
+                                marginBottom: "16px",
+                                padding: "12px 14px",
+                                borderRadius: "10px",
+                                background:
+                                    "rgba(20, 184, 166, 0.10)",
+                                border:
+                                    "1px solid rgba(20, 184, 166, 0.25)",
+                                color: "#99F6E4",
+                                fontSize: "13px",
+                                lineHeight: "1.5",
+                            }}
+                        >
+                            {success}
+                        </div>
+                    )}
 
                     <form
                         className="register-form"
@@ -378,9 +504,9 @@ function Register() {
 
                             <div
                                 className={`register-input-wrapper ${formData.confirmPassword &&
-                                        !passwordsMatch
-                                        ? "register-input-wrapper--error"
-                                        : ""
+                                    !passwordsMatch
+                                    ? "register-input-wrapper--error"
+                                    : ""
                                     }`}
                             >
                                 <LockKeyhole size={17} />
