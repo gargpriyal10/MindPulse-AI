@@ -1,10 +1,6 @@
 const AUTH_KEY = "mindpulse_auth";
 const USER_KEY = "mindpulse_user";
 
-/* ============================================================
-   CHECK AUTHENTICATION
-============================================================ */
-
 export function isAuthenticated() {
   try {
     const storedAuth =
@@ -29,7 +25,7 @@ export function isAuthenticated() {
 }
 
 /* ============================================================
-   GET CURRENT USER
+   CURRENT USER
 ============================================================ */
 
 export function getCurrentUser() {
@@ -37,12 +33,14 @@ export function getCurrentUser() {
     const storedUser =
       localStorage.getItem(USER_KEY);
 
-    return storedUser
-      ? JSON.parse(storedUser)
-      : null;
+    if (!storedUser) {
+      return null;
+    }
+
+    return JSON.parse(storedUser);
   } catch (error) {
     console.error(
-      "Unable to read user:",
+      "Unable to read current user:",
       error
     );
 
@@ -51,21 +49,7 @@ export function getCurrentUser() {
 }
 
 /* ============================================================
-   LOGOUT
-============================================================ */
-
-export function logout() {
-  localStorage.removeItem(
-    AUTH_KEY
-  );
-
-  localStorage.removeItem(
-    USER_KEY
-  );
-}
-
-/* ============================================================
-   LOGIN STATE
+   SET AUTH STATE
 ============================================================ */
 
 export function setAuthState(
@@ -85,5 +69,46 @@ export function setAuthState(
   localStorage.setItem(
     USER_KEY,
     JSON.stringify(user)
+  );
+}
+
+/* ============================================================
+   UPDATE CURRENT USER
+============================================================ */
+
+export function updateCurrentUser(
+  updates
+) {
+  const currentUser =
+    getCurrentUser();
+
+  if (!currentUser) {
+    return null;
+  }
+
+  const updatedUser = {
+    ...currentUser,
+    ...updates,
+  };
+
+  localStorage.setItem(
+    USER_KEY,
+    JSON.stringify(updatedUser)
+  );
+
+  return updatedUser;
+}
+
+/* ============================================================
+   LOGOUT
+============================================================ */
+
+export function logout() {
+  localStorage.removeItem(
+    AUTH_KEY
+  );
+
+  localStorage.removeItem(
+    USER_KEY
   );
 }

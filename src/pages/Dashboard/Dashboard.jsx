@@ -30,7 +30,7 @@ import {
 import {
   getMonitoringSessions,
 } from "../../services/monitoringService";
-
+import { getCurrentUser } from "../../services/auth";
 import "./Dashboard.css";
 import { logout } from "../../services/auth";
 
@@ -226,6 +226,59 @@ function getTrendData(sessions) {
 }
 
 function Dashboard() {
+  const currentUser = getCurrentUser();
+
+  /* ============================================================
+     TIME-BASED GREETING
+  ============================================================ */
+
+  const currentHour = new Date().getHours();
+
+  let greeting;
+
+  if (currentHour >= 5 && currentHour < 12) {
+    greeting = "Good morning";
+  } else if (currentHour >= 12 && currentHour < 17) {
+    greeting = "Good afternoon";
+  } else if (currentHour >= 17 && currentHour < 21) {
+    greeting = "Good evening";
+  } else {
+    greeting = "Good night";
+  }
+
+  /* ============================================================
+     FIRST NAME
+  ============================================================ */
+
+  const rawName =
+    currentUser?.name ||
+    currentUser?.email?.split("@")[0] ||
+    "User";
+
+  /*
+   * Take only the first word.
+   *
+   * Examples:
+   * "Priyal Garg Cs Aiml24" → "Priyal"
+   * "Priyal"                → "Priyal"
+   * "priyal@example.com"    → "priyal"
+   */
+
+  const firstName =
+    rawName
+      .trim()
+      .split(/\s+/)[0]
+      .replace(/[^a-zA-Z]/g, "") || "User";
+
+  /* ============================================================
+     AVATAR INITIALS
+  ============================================================ */
+
+  const initials =
+    firstName
+      .slice(0, 2)
+      .toUpperCase();
+
   const [showNotifications, setShowNotifications] =
     useState(false);
 
@@ -552,9 +605,9 @@ function Dashboard() {
           <a
             href="/login"
             className="dashboard-sidebar__logout"
-            onClick = {logout}
+            onClick={logout}
           >
-            <LogOut size = {17} />
+            <LogOut size={17} />
             <span>Logout</span>
           </a>
 
@@ -581,7 +634,7 @@ function Dashboard() {
             </span>
 
             <h1>
-              Good afternoon, Priyal.
+              {greeting}, {firstName}.
               <span> 👋</span>
             </h1>
 
@@ -721,7 +774,7 @@ function Dashboard() {
             </div>
 
             <div className="dashboard-avatar">
-              PG
+              {initials}
             </div>
 
           </div>
