@@ -4,8 +4,12 @@ from app.services.emotion_service import save_uploaded_image
 
 from app.services.emotion_service import (
     save_uploaded_image,
-    detect_face
+    detect_face,
+    predict_emotion
 )
+
+import cv2
+import os
 
 emotion_bp = Blueprint(
     "emotion",
@@ -37,7 +41,7 @@ def upload_image():
 
     image_path = os.path.join("uploads", filename)
 
-    success, face_message = detect_face(image_path)
+    success, face_message, face = detect_face(image_path)
 
     if not success:
         return jsonify({
@@ -45,8 +49,13 @@ def upload_image():
         "message": face_message
     }), 400
 
+    emotion_result = predict_emotion(face)
+
     return jsonify({
     "success": True,
     "message": face_message,
-    "filename": filename
+    "filename": filename,
+    "emotion": emotion_result["dominant_emotion"],
+    "confidence": round(emotion_result["confidence"], 4),
+    "scores": emotion_result["scores"]
 }), 200
