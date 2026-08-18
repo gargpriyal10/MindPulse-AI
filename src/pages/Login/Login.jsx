@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from "lucide-react";
+import { setAuthState } from "../../services/auth";
 
 import Button from "../../components/ui/Button";
 
@@ -115,30 +116,12 @@ function Login() {
         new Date().toISOString(),
     };
 
-    /*
-     * Store the frontend authentication state.
-     */
-
-    localStorage.setItem(
-      "mindpulse_auth",
-      JSON.stringify({
-        authenticated: true,
-        rememberMe,
-        loginTime:
-          new Date().toISOString(),
-      })
-    );
-
-    localStorage.setItem(
-      "mindpulse_user",
-      JSON.stringify(user)
+    setAuthState(
+      user,
+      rememberMe
     );
 
     setIsLoading(false);
-
-    /*
-     * Navigate to Dashboard.
-     */
 
     window.location.href =
       "/dashboard";

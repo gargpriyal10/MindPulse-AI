@@ -13,6 +13,7 @@ import {
   ShieldCheck,
   Sparkles,
   TrendingUp,
+  LogOut,
   X,
 } from "lucide-react";
 
@@ -31,6 +32,7 @@ import {
 } from "../../services/monitoringService";
 
 import "./Dashboard.css";
+import { logout } from "../../services/auth";
 
 
 function getCompletedSessions() {
@@ -548,10 +550,12 @@ function Dashboard() {
           </div>
 
           <a
-            href="/"
+            href="/login"
             className="dashboard-sidebar__logout"
+            onClick = {logout}
           >
-            ← Back to home
+            <LogOut size = {17} />
+            <span>Logout</span>
           </a>
 
         </div>
