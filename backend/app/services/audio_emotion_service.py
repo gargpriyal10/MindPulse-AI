@@ -71,5 +71,5 @@ def analyze_audio(file):
         "emotion": prediction["emotion"],
         "confidence": prediction["confidence"],
         "scores": prediction["scores"],
-        "audio_path": file_path
+        "audio_path": file_path.replace("\\", "/")
     }, 200
