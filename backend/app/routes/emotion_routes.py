@@ -12,7 +12,7 @@ from app.services.emotion_service import (
     detect_face,
     predict_emotion
 )
-
+from app.services.emotion_fusion_service import generate_fused_emotion
 import os
 
 emotion_bp = Blueprint(
@@ -90,3 +90,31 @@ def emotion_history():
             for item in history
         ]
     }), 200
+
+@emotion_bp.route("/fusion/test", methods=["POST"])
+@jwt_required()
+def fusion_test():
+    """
+    Test emotion fusion using JSON input.
+    """
+
+    data = request.get_json()
+
+    if not data:
+        return jsonify({
+            "success": False,
+            "message": "JSON body is required."
+        }), 400
+
+    if "face" not in data or "audio" not in data:
+        return jsonify({
+            "success": False,
+            "message": "Both face and audio data are required."
+        }), 400
+
+    result = generate_fused_emotion(
+        face_result=data["face"],
+        audio_result=data["audio"]
+    )
+
+    return jsonify(result), 200
