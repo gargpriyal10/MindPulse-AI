@@ -5,6 +5,7 @@ from config import Config
 from app.database import db, migrate, jwt
 from app.routes.user_routes import user_bp
 from app.routes.emotion_routes import emotion_bp
+from app.routes.audio_routes import audio_bp
 
 
 
@@ -33,5 +34,6 @@ def create_app():
     app.register_blueprint(auth_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(emotion_bp)
+    app.register_blueprint(audio_bp)
 
     return app
