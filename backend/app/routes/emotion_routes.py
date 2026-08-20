@@ -8,7 +8,7 @@ from flask import Blueprint, request, jsonify
 from app.services.emotion_service import save_uploaded_image
 
 from app.services.emotion_fusion_service import process_fusion
-
+from app.services.report_service import generate_emotion_report
 from app.services.emotion_service import (
     save_uploaded_image,
     detect_face,
@@ -146,3 +146,15 @@ def fusion():
     )
 
     return jsonify(response), status_code
+
+@emotion_bp.route("/report", methods=["GET"])
+@jwt_required()
+def emotion_report():
+    """
+    Returns the emotion summary report
+    for the logged-in user.
+    """
+
+    response = generate_emotion_report()
+
+    return jsonify(response), 200
