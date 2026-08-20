@@ -16,6 +16,7 @@ from app.services.emotion_service import (
 )
 from app.services.emotion_fusion_service import generate_fused_emotion
 import os
+from app.services.analytics_service import get_emotion_analytics
 
 emotion_bp = Blueprint(
     "emotion",
@@ -156,5 +157,17 @@ def emotion_report():
     """
 
     response = generate_emotion_report()
+
+    return jsonify(response), 200
+
+@emotion_bp.route("/analytics", methods=["GET"])
+@jwt_required()
+def emotion_analytics():
+    """
+    Returns analytics data
+    for dashboard charts.
+    """
+
+    response = get_emotion_analytics()
 
     return jsonify(response), 200
