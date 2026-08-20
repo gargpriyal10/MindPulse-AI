@@ -8,6 +8,7 @@ from app.routes.emotion_routes import emotion_bp
 from app.routes.audio_routes import audio_bp
 from app.routes.privacy_routes import privacy_bp
 from app.models.session import Session
+from app.routes.session_routes import session_bp
 
 def create_app():
     app = Flask(__name__)
@@ -36,5 +37,6 @@ def create_app():
     app.register_blueprint(emotion_bp)
     app.register_blueprint(audio_bp)
     app.register_blueprint(privacy_bp)
+    app.register_blueprint(session_bp)
 
     return app
