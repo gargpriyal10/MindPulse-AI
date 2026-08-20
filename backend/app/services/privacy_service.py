@@ -1,7 +1,7 @@
 from flask_jwt_extended import get_jwt_identity
 
 from app.models.emotion_history import EmotionHistory
-from app.extensions import db
+from app.database import db
 
 
 def delete_emotion_history():
