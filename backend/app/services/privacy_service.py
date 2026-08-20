@@ -55,3 +55,18 @@ def delete_user_account():
         "success": True,
         "message": "User account deleted successfully."
     }, 200
+
+def get_privacy_settings():
+    """
+    Return available privacy actions for the logged-in user.
+    """
+
+    return {
+        "success": True,
+        "data": {
+            "can_delete_history": True,
+            "can_delete_account": True,
+            "history_endpoint": "/api/privacy/history",
+            "account_endpoint": "/api/privacy/account"
+        }
+    }, 200

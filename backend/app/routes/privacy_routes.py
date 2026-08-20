@@ -1,7 +1,11 @@
 from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
 
-from app.services.privacy_service import (delete_emotion_history, delete_user_account)
+from app.services.privacy_service import (
+    delete_emotion_history,
+    delete_user_account,
+    get_privacy_settings
+)
 
 privacy_bp = Blueprint("privacy", __name__, url_prefix="/api/privacy")
 
@@ -17,3 +21,10 @@ def delete_history():
 def delete_account():
     response, status_code = delete_user_account()
     return jsonify(response), status_code
+
+@privacy_bp.route("", methods=["GET"])
+@jwt_required()
+def privacy_settings():
+    response, status_code = get_privacy_settings()
+    return jsonify(response), status_code
+
