@@ -7,6 +7,8 @@ from flask import Blueprint, request, jsonify
 
 from app.services.emotion_service import save_uploaded_image
 
+from app.services.emotion_fusion_service import process_fusion
+
 from app.services.emotion_service import (
     save_uploaded_image,
     detect_face,
@@ -118,3 +120,29 @@ def fusion_test():
     )
 
     return jsonify(result), 200
+
+@emotion_bp.route("/fusion", methods=["POST"])
+@jwt_required()
+def fusion():
+
+    if "image" not in request.files:
+        return jsonify({
+            "success": False,
+            "message": "Image file is required."
+        }), 400
+
+    if "audio" not in request.files:
+        return jsonify({
+            "success": False,
+            "message": "Audio file is required."
+        }), 400
+
+    image_file = request.files["image"]
+    audio_file = request.files["audio"]
+
+    response, status_code = process_fusion(
+        image_file=image_file,
+        audio_file=audio_file
+    )
+
+    return jsonify(response), status_code
