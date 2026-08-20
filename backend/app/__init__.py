@@ -7,7 +7,7 @@ from app.routes.user_routes import user_bp
 from app.routes.emotion_routes import emotion_bp
 from app.routes.audio_routes import audio_bp
 from app.routes.privacy_routes import privacy_bp
-
+from app.models.session import Session
 
 def create_app():
     app = Flask(__name__)
