@@ -57,12 +57,12 @@ def predict_audio(file):
     prediction = predict_audio_emotion(file_path)
 
     return {
-        "success": True,
-        "emotion": prediction["emotion"],
-        "confidence": prediction["confidence"],
-        "scores": prediction["scores"],
-        "audio_path": file_path.replace("\\", "/")
-    }, 200
+    "success": True,
+    "emotion": prediction["emotion"],
+    "confidence": prediction["confidence"],
+    "scores": prediction["scores"],
+    "media_path": file_path.replace("\\", "/")
+}, 200
 
 
 def analyze_audio(file):
@@ -80,7 +80,7 @@ def analyze_audio(file):
         user_id=get_jwt_identity(),
         emotion=response["emotion"],
         confidence=response["confidence"],
-        image_path=response["audio_path"]
+        media_path=response["media_path"]      # <-- Changed
     )
 
     db.session.add(history)

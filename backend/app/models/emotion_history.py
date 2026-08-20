@@ -24,10 +24,10 @@ class EmotionHistory(db.Model):
         nullable=False
     )
 
-    image_path = db.Column(
-        db.String(255),
-        nullable=False
-    )
+    media_path = db.Column(
+    db.String(255),
+    nullable=False
+)
 
     created_at = db.Column(
         db.DateTime,
@@ -44,9 +44,9 @@ class EmotionHistory(db.Model):
 
     def to_dict(self):
         return {
-            "id": self.id,
-            "emotion": self.emotion,
-            "confidence": round(self.confidence, 4),
-            "image_path": self.image_path,
-            "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S")
-        }
+        "id": self.id,
+        "emotion": self.emotion,
+        "confidence": round(self.confidence, 4),
+        "media_path": self.media_path,
+        "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    }

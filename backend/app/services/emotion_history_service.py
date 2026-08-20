@@ -1,3 +1,5 @@
+from flask_jwt_extended import get_jwt_identity
+
 from app.database import db
 from app.models.emotion_history import EmotionHistory
 
@@ -6,7 +8,7 @@ def save_emotion_history(
     user_id,
     emotion,
     confidence,
-    image_path
+    media_path
 ):
     """
     Save detected emotion into the database.
@@ -16,15 +18,13 @@ def save_emotion_history(
         user_id=user_id,
         emotion=emotion,
         confidence=confidence,
-        image_path=image_path
+        media_path=media_path
     )
 
     db.session.add(history)
     db.session.commit()
 
     return history
-
-from app.models.emotion_history import EmotionHistory
 
 
 def get_user_emotion_history(user_id):
@@ -41,9 +41,6 @@ def get_user_emotion_history(user_id):
 
     return history
 
-from flask_jwt_extended import get_jwt_identity
-from app.models.emotion_history import EmotionHistory
-
 
 def get_audio_history():
     """
@@ -56,7 +53,7 @@ def get_audio_history():
     history = (
         EmotionHistory.query
         .filter_by(user_id=user_id)
-        .filter(EmotionHistory.image_path.like("uploads/audio%"))
+        .filter(EmotionHistory.media_path.like("uploads/audio%"))
         .order_by(EmotionHistory.created_at.desc())
         .all()
     )
@@ -66,12 +63,12 @@ def get_audio_history():
         "count": len(history),
         "history": [
             {
-                "id": item.id,
-                "emotion": item.emotion,
-                "confidence": round(item.confidence, 4),
-                "audio_path": item.image_path.replace("\\", "/"),
-                "created_at": item.created_at.strftime("%Y-%m-%d %H:%M:%S")
-            }
+    "id": item.id,
+    "emotion": item.emotion,
+    "confidence": round(item.confidence, 4),
+    "media_path": item.media_path.replace("\\", "/"),
+    "created_at": item.created_at.strftime("%Y-%m-%d %H:%M:%S")
+}
             for item in history
         ]
     }

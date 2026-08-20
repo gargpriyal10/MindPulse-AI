@@ -65,7 +65,7 @@ def upload_image():
     user_id=user_id,
     emotion=emotion_result["dominant_emotion"],
     confidence=emotion_result["confidence"],
-    image_path=image_path
+    media_path=image_path
 )
 
     return jsonify({
