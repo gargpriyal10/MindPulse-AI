@@ -5,7 +5,7 @@ from app.services.emotion_service import (
     predict_emotion
 )
 
-from app.services.audio_emotion_service import analyze_audio
+from app.services.audio_emotion_service import predict_audio
 
 def generate_fused_emotion(face_result, audio_result):
     """
@@ -60,7 +60,7 @@ def process_fusion(image_file, audio_file):
     }
 
     # ---------- Audio ----------
-    audio_response, status_code = analyze_audio(audio_file)
+    audio_response, status_code = predict_audio(audio_file)
 
     if status_code != 200:
         return audio_response, status_code

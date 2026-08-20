@@ -19,10 +19,10 @@ def allowed_audio(filename):
     )
 
 
-def analyze_audio(file):
+def predict_audio(file):
     """
-    Save uploaded audio, predict emotion,
-    store history and return response.
+    Save uploaded audio and return prediction only.
+    Does NOT save EmotionHistory.
     """
 
     if file is None:
@@ -56,16 +56,6 @@ def analyze_audio(file):
 
     prediction = predict_audio_emotion(file_path)
 
-    history = EmotionHistory(
-        user_id=get_jwt_identity(),
-        emotion=prediction["emotion"],
-        confidence=prediction["confidence"],
-        image_path=file_path
-    )
-
-    db.session.add(history)
-    db.session.commit()
-
     return {
         "success": True,
         "emotion": prediction["emotion"],
@@ -73,3 +63,27 @@ def analyze_audio(file):
         "scores": prediction["scores"],
         "audio_path": file_path.replace("\\", "/")
     }, 200
+
+
+def analyze_audio(file):
+    """
+    Save uploaded audio, predict emotion,
+    store history and return response.
+    """
+
+    response, status_code = predict_audio(file)
+
+    if status_code != 200:
+        return response, status_code
+
+    history = EmotionHistory(
+        user_id=get_jwt_identity(),
+        emotion=response["emotion"],
+        confidence=response["confidence"],
+        image_path=response["audio_path"]
+    )
+
+    db.session.add(history)
+    db.session.commit()
+
+    return response, 200
