@@ -136,7 +136,7 @@ function Profile() {
                     0
                 ) / sessionCount
             )
-            : 84;
+            : 0;
 
     const averageConfidence =
         sessionCount > 0
@@ -480,7 +480,7 @@ function Profile() {
                                     <span>Well-being score</span>
                                 </div>
 
-                                <small>+6.2%</small>
+                                <small>Based on sessions</small>
                             </div>
 
                             <div className="profile-stat">
@@ -506,7 +506,13 @@ function Profile() {
                                     <span>AI confidence</span>
                                 </div>
 
-                                <small>Excellent</small>
+                                <small>
+                                    {averageConfidence >= 90
+                                        ? "Excellent"
+                                        : averageConfidence >= 75
+                                        ? "Good"
+                                        : "Developing"}
+                                </small>
                             </div>
 
                             <div className="profile-stat">

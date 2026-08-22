@@ -721,16 +721,7 @@ function Reports() {
         [monitoringSessions, period]
     );
 
-    const averageScore = useMemo(() => {
-        const total = currentData.weekly.reduce(
-            (sum, item) => sum + item.score,
-            0
-        );
-
-        return Math.round(
-            total / currentData.weekly.length
-        );
-    }, [currentData]);
+    const averageScore = currentData.summary.wellbeing;
 
     const chartPoints = useMemo(() => {
         const data = currentData.weekly;
