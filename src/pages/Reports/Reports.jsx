@@ -405,7 +405,33 @@ function getAverage(sessions, key) {
 
 function createWeeklyData(sessions, period) {
     if (!sessions.length) {
-        return reportData[period].weekly;
+        if (period === "This week") {
+            return [
+                { label: "Mon", score: 0 },
+                { label: "Tue", score: 0 },
+                { label: "Wed", score: 0 },
+                { label: "Thu", score: 0 },
+                { label: "Fri", score: 0 },
+                { label: "Sat", score: 0 },
+                { label: "Sun", score: 0 },
+            ];
+        }
+
+        if (period === "This month") {
+            return [
+                { label: "Week 1", score: 0 },
+                { label: "Week 2", score: 0 },
+                { label: "Week 3", score: 0 },
+                { label: "Week 4", score: 0 },
+            ];
+        }
+
+        return [
+            { label: "May", score: 0 },
+            { label: "Jun", score: 0 },
+            { label: "Jul", score: 0 },
+            { label: "Aug", score: 0 },
+        ];
     }
 
     const now = new Date();
@@ -538,7 +564,39 @@ function buildConnectedReportData(
     period
 ) {
     if (!sessions.length) {
-        return reportData[period];
+        return {
+            summary: {
+                wellbeing: 0,
+                sessions: 0,
+                confidence: 0,
+                duration: 0,
+            },
+
+            weekly: createWeeklyData(
+                [],
+                period
+            ),
+
+            emotions: [],
+
+            balance: {
+                positive: 0,
+                neutral: 0,
+                negative: 0,
+            },
+
+            monthly: [
+                { label: "May", score: 0 },
+                { label: "Jun", score: 0 },
+                { label: "Jul", score: 0 },
+                { label: "Aug", score: 0 },
+            ],
+
+            trend: 0,
+
+            insight:
+                "Complete a monitoring session to start building your emotional well-being report.",
+        };
     }
 
     const wellbeing =
@@ -714,7 +772,159 @@ function Reports() {
         return `0,100 ${points} 100,100`;
     }, [currentData]);
 
-    const handleExport = () => {
+    const buildReportPayload = () => {
+        return {
+            application: "MindPulse AI",
+            reportType:
+                "Emotion Recognition & Well-being Monitoring",
+            period,
+            exportedAt: new Date().toISOString(),
+            summary: currentData.summary,
+            weekly: currentData.weekly,
+            emotions: currentData.emotions,
+            emotionalBalance: currentData.balance,
+            monthly: currentData.monthly,
+            trend: currentData.trend,
+            insight: currentData.insight,
+            sessions: monitoringSessions.map(
+                (session) => ({
+                    id: session.id,
+                    startedAt: session.startedAt,
+                    endedAt: session.endedAt,
+                    duration: session.duration,
+                    dominantEmotion:
+                        session.dominantEmotion,
+                    wellbeingScore:
+                        session.wellbeingScore,
+                    confidence:
+                        session.confidence,
+                    status: session.status,
+                })
+            ),
+        };
+    };
+
+    const downloadBlob = (
+        content,
+        filename,
+        type
+    ) => {
+        const blob = new Blob(
+            [content],
+            { type }
+        );
+
+        const url =
+            URL.createObjectURL(blob);
+
+        const anchor =
+            document.createElement("a");
+
+        anchor.href = url;
+        anchor.download = filename;
+
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+
+        URL.revokeObjectURL(url);
+    };
+
+    const escapeCsvValue = (value) => {
+        const textValue =
+            value === null ||
+                value === undefined
+                ? ""
+                : String(value);
+
+        return `"${textValue.replace(
+            /"/g,
+            '""'
+        )}"`;
+    };
+
+    const handleExportJson = () => {
+        const exportDate = new Date()
+            .toISOString()
+            .slice(0, 10);
+
+        const safePeriod = period.replace(
+            /\s+/g,
+            "_"
+        );
+
+        const json = JSON.stringify(
+            buildReportPayload(),
+            null,
+            2
+        );
+
+        downloadBlob(
+            json,
+            `MindPulse_Report_${safePeriod}_${exportDate}.json`,
+            "application/json;charset=utf-8"
+        );
+
+        setShowExportToast(true);
+
+        setTimeout(() => {
+            setShowExportToast(false);
+        }, 2500);
+    };
+
+    const handleExportCsv = () => {
+        const exportDate = new Date()
+            .toISOString()
+            .slice(0, 10);
+
+        const safePeriod = period.replace(
+            /\s+/g,
+            "_"
+        );
+
+        const headers = [
+            "Session ID",
+            "Started At",
+            "Ended At",
+            "Duration (minutes)",
+            "Dominant Emotion",
+            "Well-being Score",
+            "AI Confidence",
+            "Status",
+        ];
+
+        const rows =
+            monitoringSessions.map(
+                (session) => [
+                    session.id,
+                    session.startedAt,
+                    session.endedAt || "",
+                    session.duration,
+                    session.dominantEmotion ||
+                    "",
+                    session.wellbeingScore,
+                    session.confidence,
+                    session.status,
+                ]
+            );
+
+        const csv = [
+            headers,
+            ...rows,
+        ]
+            .map((row) =>
+                row
+                    .map(escapeCsvValue)
+                    .join(",")
+            )
+            .join("\r\n");
+
+        downloadBlob(
+            csv,
+            `MindPulse_Sessions_${safePeriod}_${exportDate}.csv`,
+            "text/csv;charset=utf-8"
+        );
+
         setShowExportToast(true);
 
         setTimeout(() => {
@@ -848,14 +1058,25 @@ function Reports() {
                             <ChevronDown size={13} />
                         </div>
 
-                        <button
-                            type="button"
-                            className="reports-export"
-                            onClick={handleExport}
-                        >
-                            <Download size={13} />
-                            Export
-                        </button>
+                        <div className="reports-export-group">
+                            <button
+                                type="button"
+                                className="reports-export"
+                                onClick={handleExportJson}
+                            >
+                                <Download size={13} />
+                                JSON
+                            </button>
+
+                            <button
+                                type="button"
+                                className="reports-export reports-export--secondary"
+                                onClick={handleExportCsv}
+                            >
+                                <Download size={13} />
+                                CSV
+                            </button>
+                        </div>
                     </div>
                 </header>
 
