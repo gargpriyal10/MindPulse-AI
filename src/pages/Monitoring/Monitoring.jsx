@@ -680,7 +680,12 @@ function Monitoring() {
               currentEmotion.name,
             confidence:
               currentEmotion.confidence,
-            wellbeingScore: 84,
+            wellbeingScore: Math.round(
+              emotionSignals.reduce(
+                (total, signal) => total + Number(signal.value || 0),
+                0
+              ) / emotionSignals.length
+            ),
             emotions:
               emotionSignals.reduce(
                 (result, signal) => ({
