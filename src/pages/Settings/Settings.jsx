@@ -29,7 +29,6 @@ function Settings() {
         weeklyReports: true,
         emotionAlerts: false,
         autoStartCamera: false,
-        saveHistory: true,
         anonymousAnalytics: false,
     };
 
@@ -300,15 +299,7 @@ function Settings() {
                         }
                     />
 
-                    <SettingRow
-                        icon={<Activity size={15} />}
-                        title="Save session history"
-                        description="Keep completed monitoring sessions in your history."
-                        checked={settings.saveHistory}
-                        onChange={() =>
-                            updateSetting("saveHistory")
-                        }
-                    />
+                    
                 </Card>
 
                 {/* PRIVACY */}
