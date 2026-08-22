@@ -281,7 +281,7 @@ function History() {
                   ? Math.round(
                     sessions.reduce(
                       (total, session) =>
-                        total + Number(session.score || 0),
+                        total + Number(session.wellbeingScore || 0),
                       0
                     ) / sessions.length
                   )
