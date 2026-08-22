@@ -16,6 +16,10 @@ import {
 } from "lucide-react";
 
 import Card from "../../components/ui/Card";
+import {
+    getCurrentUser,
+    updateCurrentUser,
+} from "../../services/auth";
 import { getMonitoringSessions } from "../../services/monitoringService";
 
 import "./Profile.css";
@@ -24,9 +28,16 @@ function Profile() {
     const [editing, setEditing] = useState(false);
     const [saved, setSaved] = useState(false);
 
+    const currentUser = getCurrentUser();
+
     const defaultProfile = {
-        name: "Priyal Garg",
-        email: "priyal@example.com",
+        name:
+            currentUser?.name ||
+            currentUser?.email?.split("@")[0] ||
+            "User",
+        email:
+            currentUser?.email ||
+            "",
         location: "India",
         timezone: "IST (UTC +5:30)",
     };
@@ -38,7 +49,10 @@ function Profile() {
             );
 
             return stored
-                ? { ...defaultProfile, ...JSON.parse(stored) }
+                ? {
+                    ...defaultProfile,
+                    ...JSON.parse(stored),
+                }
                 : defaultProfile;
         } catch (error) {
             console.error(
@@ -71,12 +85,27 @@ function Profile() {
     };
 
     const handleSave = () => {
-        setProfile(draftProfile);
+        const updatedProfile = {
+            ...draftProfile,
+            name: draftProfile.name.trim(),
+            email: draftProfile.email.trim().toLowerCase(),
+            location: draftProfile.location.trim(),
+            timezone: draftProfile.timezone.trim(),
+        };
+
+        setProfile(updatedProfile);
 
         localStorage.setItem(
             "mindpulse_profile",
-            JSON.stringify(draftProfile)
+            JSON.stringify(updatedProfile)
         );
+
+        updateCurrentUser({
+            name: updatedProfile.name,
+            email: updatedProfile.email,
+            location: updatedProfile.location,
+            timezone: updatedProfile.timezone,
+        });
 
         setEditing(false);
         setSaved(true);
@@ -134,7 +163,16 @@ function Profile() {
     const monitoringHours =
         sessionCount > 0
             ? (totalMinutes / 60).toFixed(1)
-            : "8.4";
+            : "0.0";
+
+    const memberSinceLabel = currentUser?.createdAt
+        ? new Date(
+            currentUser.createdAt
+        ).toLocaleDateString("en-IN", {
+            month: "long",
+            year: "numeric",
+        })
+        : "August 2026";
 
     return (
         <main className="profile-page">
@@ -313,7 +351,7 @@ function Profile() {
                         <div className="profile-meta">
                             <span>
                                 <CalendarDays size={12} />
-                                Member since August 2026
+                                Member since {memberSinceLabel}
                             </span>
 
                             <span>
@@ -451,7 +489,7 @@ function Profile() {
                                 </div>
 
                                 <div>
-                                    <strong>{sessionCount || 28}</strong>
+                                    <strong>{sessionCount}</strong>
                                     <span>Total sessions</span>
                                 </div>
 
