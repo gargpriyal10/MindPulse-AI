@@ -15,7 +15,10 @@ import {
 } from "lucide-react";
 
 import Card from "../../components/ui/Card";
-import { clearMonitoringSessions } from "../../services/monitoringService";
+import {
+    getCurrentUser,
+    updateCurrentUser,
+} from "../../services/auth";
 
 import "./Settings.css";
 
@@ -32,10 +35,9 @@ function Settings() {
 
     const [settings, setSettings] = useState(() => {
         try {
-            const stored =
-                localStorage.getItem(
-                    "mindpulse_settings"
-                );
+            const stored = localStorage.getItem(
+                "mindpulse_settings"
+            );
 
             return stored
                 ? {
@@ -56,10 +58,19 @@ function Settings() {
     const [saved, setSaved] = useState(false);
 
     const updateSetting = (key) => {
-        setSettings((current) => ({
-            ...current,
-            [key]: !current[key],
-        }));
+        setSettings((current) => {
+            const updatedSettings = {
+                ...current,
+                [key]: !current[key],
+            };
+
+            localStorage.setItem(
+                "mindpulse_settings",
+                JSON.stringify(updatedSettings)
+            );
+
+            return updatedSettings;
+        });
 
         setSaved(false);
     };
@@ -70,35 +81,20 @@ function Settings() {
             JSON.stringify(settings)
         );
 
+        updateCurrentUser({
+            preferences: {
+                ...(getCurrentUser()?.preferences || {}),
+                notifications: settings.notifications,
+                weeklyReports: settings.weeklyReports,
+                emotionAlerts: settings.emotionAlerts,
+            },
+        });
+
         setSaved(true);
 
         setTimeout(() => {
             setSaved(false);
         }, 2500);
-    };
-
-    const handleDeleteLocalData = () => {
-        const confirmed =
-            window.confirm(
-                "This will remove your locally stored profile, settings, and monitoring history from this browser. Continue?"
-            );
-
-        if (!confirmed) {
-            return;
-        }
-
-        clearMonitoringSessions();
-
-        localStorage.removeItem(
-            "mindpulse_profile"
-        );
-
-        localStorage.removeItem(
-            "mindpulse_settings"
-        );
-
-        window.location.href =
-            "/profile";
     };
 
     return (
@@ -378,7 +374,7 @@ function Settings() {
                         <h2>Account actions</h2>
 
                         <p>
-                            Manage your profile and locally stored account data.
+                            Manage your profile and account data.
                         </p>
                     </div>
 
@@ -389,12 +385,9 @@ function Settings() {
                             <ChevronRight size={14} />
                         </a>
 
-                        <button
-                            type="button"
-                            onClick={handleDeleteLocalData}
-                        >
+                        <button type="button">
                             <Trash2 size={15} />
-                            Delete local data
+                            Delete account
                             <ChevronRight size={14} />
                         </button>
                     </div>
