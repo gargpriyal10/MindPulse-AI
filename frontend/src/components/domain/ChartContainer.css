@@ -1,0 +1,49 @@
+.chart-container {
+  min-width: 0;
+}
+
+.chart-container__canvas {
+  position: relative;
+
+  width: 100%;
+
+  margin-top: 0.5rem;
+}
+
+.chart-container__expand {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #7f8ca0;
+
+  background: rgba(255, 255, 255, 0.035);
+
+  border: 1px solid rgba(255, 255, 255, 0.07);
+
+  border-radius: 0.6rem;
+
+  cursor: pointer;
+
+  transition:
+    color 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease;
+}
+
+.chart-container__expand:hover {
+  color: #14b8a6;
+
+  background: rgba(20, 184, 166, 0.08);
+
+  border-color: rgba(20, 184, 166, 0.2);
+}
+
+@media (max-width: 640px) {
+  .chart-container__canvas {
+    height: 250px !important;
+  }
+}
