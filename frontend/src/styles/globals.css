@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap");
 
 * {
   margin: 0;
@@ -17,16 +17,12 @@ body {
   font-family: var(--font-family);
 
   background:
-    radial-gradient(
-      circle at 15% 15%,
+    radial-gradient(circle at 15% 15%,
       rgba(20, 184, 166, 0.06),
-      transparent 30%
-    ),
-    radial-gradient(
-      circle at 85% 80%,
+      transparent 30%),
+    radial-gradient(circle at 85% 80%,
       rgba(192, 132, 252, 0.05),
-      transparent 30%
-    ),
+      transparent 30%),
     var(--color-bg-primary);
 
   color: var(--color-text-primary);
@@ -162,4 +158,16 @@ img {
 ::selection {
   background: rgba(20, 184, 166, 0.3);
   color: var(--color-text-primary);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
 }
