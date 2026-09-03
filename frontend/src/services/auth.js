@@ -25,7 +25,7 @@ export function isAuthenticated() {
 }
 
 /* ============================================================
-   CURRENT USER
+  CURRENT USER
 ============================================================ */
 
 export function getCurrentUser() {
@@ -49,7 +49,7 @@ export function getCurrentUser() {
 }
 
 /* ============================================================
-   SET AUTH STATE
+  SET AUTH STATE
 ============================================================ */
 
 export function setAuthState(
@@ -73,7 +73,7 @@ export function setAuthState(
 }
 
 /* ============================================================
-   UPDATE CURRENT USER
+  UPDATE CURRENT USER
 ============================================================ */
 
 export function updateCurrentUser(
@@ -100,15 +100,13 @@ export function updateCurrentUser(
 }
 
 /* ============================================================
-   LOGOUT
+  LOGOUT
 ============================================================ */
 
 export function logout() {
-  localStorage.removeItem(
-    AUTH_KEY
-  );
+  localStorage.removeItem(AUTH_KEY);
 
-  localStorage.removeItem(
-    USER_KEY
-  );
+  localStorage.removeItem(USER_KEY);
+
+  localStorage.removeItem("access_token");
 }

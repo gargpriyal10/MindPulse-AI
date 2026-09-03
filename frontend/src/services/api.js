@@ -92,15 +92,12 @@ const mockRequest = (data, delay = MOCK_DELAY) => {
 // ------------------------------------------------------------
 
 export const loginUser = async (credentials) => {
-  await mockRequest(null, 600);
+  const response = await apiClient.post(
+    "/auth/login",
+    credentials
+  );
 
-  return {
-    data: {
-      user: currentUser,
-      token: "mock-access-token",
-      authenticated: true,
-    },
-  };
+  return response;
 };
 
 export const registerUser = async (userData) => {

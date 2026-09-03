@@ -11,7 +11,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { setAuthState } from "../../services/auth";
-
+import { loginUser } from "../../services/api";
 import Button from "../../components/ui/Button";
 
 import "./Login.css";
@@ -63,7 +63,7 @@ function Login() {
       formData.password;
 
     /* =====================================================
-       FRONTEND VALIDATION
+      FRONTEND VALIDATION
     ===================================================== */
 
     if (!email || !password) {
@@ -91,40 +91,42 @@ function Login() {
     }
 
     /* =====================================================
-       FRONTEND-ONLY LOGIN
-       
-       This will later be replaced by the backend API.
+      FRONTEND-ONLY LOGIN
+      
+      This will later be replaced by the backend API.
     ===================================================== */
-
     setIsLoading(true);
 
-    await new Promise((resolve) =>
-      setTimeout(resolve, 700)
-    );
+    try {
+      const response = await loginUser({
+        email,
+        password,
+      });
 
-    const user = {
-      name: email
-        .split("@")[0]
-        .replace(/[._-]/g, " ")
-        .replace(/\b\w/g, (letter) =>
-          letter.toUpperCase()
-        ),
+      const { success, access_token, user, message } =
+        response.data;
 
-      email,
+      if (!success) {
+        setError(message || "Login failed.");
+        return;
+      }
 
-      loginTime:
-        new Date().toISOString(),
-    };
+      localStorage.setItem(
+        "access_token",
+        access_token
+      );
 
-    setAuthState(
-      user,
-      rememberMe
-    );
+      setAuthState(user, rememberMe);
 
-    setIsLoading(false);
-
-    window.location.href =
-      "/dashboard";
+      window.location.href = "/dashboard";
+    } catch (error) {
+      setError(
+        error.response?.data?.message ||
+        "Unable to connect to the server."
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleForgotPassword = () => {
