@@ -101,19 +101,12 @@ export const loginUser = async (credentials) => {
 };
 
 export const registerUser = async (userData) => {
-  await mockRequest(null, 800);
+  const response = await apiClient.post(
+    "/auth/register",
+    userData
+  );
 
-  return {
-    data: {
-      user: {
-        ...currentUser,
-        ...userData,
-        id: `user-${Date.now()}`,
-      },
-      token: "mock-access-token",
-      authenticated: true,
-    },
-  };
+  return response;
 };
 
 export const logoutUser = async () => {

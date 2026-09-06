@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { registerUser } from "../../services/api";
 import {
     ArrowLeft,
     ArrowRight,
@@ -93,62 +93,20 @@ function Register() {
 
         setIsLoading(true);
 
-        /*
-         * Frontend-only registration.
-         * Real registration will later be connected to the backend API.
-         */
-
-        await new Promise((resolve) =>
-            setTimeout(resolve, 700)
-        );
-
         try {
-            const existingUsers = JSON.parse(
-                localStorage.getItem(
-                    "mindpulse_registered_users"
-                ) || "[]"
-            );
+            const response = await registerUser({
+                full_name: name,
+                email,
+                password: formData.password,
+            });
 
-            const alreadyRegistered =
-                existingUsers.some(
-                    (user) =>
-                        user.email.toLowerCase() === email
-                );
+            const { success, message } = response.data;
 
-            if (alreadyRegistered) {
-                setError(
-                    "An account with this email already exists. Please sign in instead."
-                );
-                setIsLoading(false);
+            if (!success) {
+                setError(message || "Registration failed.");
                 return;
             }
 
-            const newUser = {
-                id: `user-${Date.now()}`,
-                name,
-                email,
-                createdAt: new Date().toISOString(),
-            };
-
-            localStorage.setItem(
-                "mindpulse_registered_users",
-                JSON.stringify([
-                    ...existingUsers,
-                    newUser,
-                ])
-            );
-
-            localStorage.setItem(
-                "mindpulse_profile",
-                JSON.stringify({
-                    name,
-                    email,
-                    location: "India",
-                    timezone: "IST (UTC +5:30)",
-                })
-            );
-
-            setIsLoading(false);
             setSuccess(
                 "Account created successfully. Redirecting to sign in..."
             );
@@ -156,16 +114,14 @@ function Register() {
             setTimeout(() => {
                 navigate("/login");
             }, 900);
-        } catch (registrationError) {
-            console.error(
-                "Frontend registration failed:",
-                registrationError
-            );
 
-            setIsLoading(false);
+        } catch (error) {
             setError(
-                "Unable to create the account right now. Please try again."
+                error.response?.data?.message ||
+                "Unable to create the account right now."
             );
+        } finally {
+            setIsLoading(false);
         }
     };
 
