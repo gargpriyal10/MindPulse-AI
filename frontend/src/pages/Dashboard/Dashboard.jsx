@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Activity,
   ArrowRight,
@@ -30,7 +30,10 @@ import {
 import {
   getMonitoringSessions,
 } from "../../services/monitoringService";
-import { getCurrentUser } from "../../services/auth";
+import {
+  getCurrentUser,
+  refreshCurrentUser,
+} from "../../services/auth";
 import "./Dashboard.css";
 import { logout } from "../../services/auth";
 
@@ -227,6 +230,10 @@ function getTrendData(sessions) {
 
 function Dashboard() {
   const currentUser = getCurrentUser();
+
+  useEffect(() => {
+  refreshCurrentUser();
+}, []);
 
   /* ============================================================
      TIME-BASED GREETING
