@@ -109,6 +109,11 @@ export const registerUser = async (userData) => {
   return response;
 };
 
+export const getUserProfile = async () => {
+    const response = await apiClient.get("/users/profile");
+    return response;
+};
+
 export const logoutUser = async () => {
   return mockRequest({
     success: true,
@@ -322,5 +327,7 @@ export const checkApiHealth = async () => {
 // ------------------------------------------------------------
 // Axios client export
 // ------------------------------------------------------------
+
+
 
 export { apiClient };
