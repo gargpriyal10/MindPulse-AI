@@ -1,3 +1,5 @@
+import { getUserProfile } from "./api";
+
 const AUTH_KEY = "mindpulse_auth";
 const USER_KEY = "mindpulse_user";
 
@@ -45,6 +47,32 @@ export function getCurrentUser() {
     );
 
     return null;
+  }
+}
+
+/* ============================================================
+  REFRESH CURRENT USER
+============================================================ */
+
+export async function refreshCurrentUser() {
+  try {
+    const response = await getUserProfile();
+
+    const user = response.data.user;
+
+    localStorage.setItem(
+      USER_KEY,
+      JSON.stringify(user)
+    );
+
+    return user;
+  } catch (error) {
+    console.error(
+      "Failed to refresh user profile:",
+      error
+    );
+
+    return getCurrentUser();
   }
 }
 
