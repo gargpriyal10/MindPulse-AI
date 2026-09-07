@@ -159,6 +159,14 @@ export const getEmotionById = async (emotionId) => {
   return mockRequest(emotion);
 };
 
+export const getEmotionHistory = async () => {
+  const response = await apiClient.get(
+    "/emotions/history"
+  );
+
+  return response;
+};
+
 // ------------------------------------------------------------
 // Monitoring
 // ------------------------------------------------------------
