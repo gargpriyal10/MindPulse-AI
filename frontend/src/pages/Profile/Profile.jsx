@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
     Activity,
     Bell,
@@ -18,6 +18,7 @@ import {
 import Card from "../../components/ui/Card";
 import {
     getCurrentUser,
+    refreshCurrentUser,
     updateCurrentUser,
 } from "../../services/auth";
 import { getMonitoringSessions } from "../../services/monitoringService";
@@ -29,6 +30,10 @@ function Profile() {
     const [saved, setSaved] = useState(false);
 
     const currentUser = getCurrentUser();
+
+    useEffect(() => {
+    refreshCurrentUser();
+}, []);
 
     const defaultProfile = {
         name:
