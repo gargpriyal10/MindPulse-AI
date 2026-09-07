@@ -1,4 +1,8 @@
-import { useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Activity,
   CalendarDays,
@@ -16,7 +20,7 @@ import {
 } from "lucide-react";
 
 import Card from "../../components/ui/Card";
-import { getMonitoringSessions } from "../../services/monitoringService";
+import { getEmotionHistory } from "../../services/api";
 
 import "./History.css";
 
@@ -32,62 +36,9 @@ function History() {
   const [selectedSession, setSelectedSession] =
     useState(null);
 
-  const sessions = useMemo(() => {
-    return getMonitoringSessions().map((session) => {
-      const startDate = new Date(session.startedAt);
+  const [sessions, setSessions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-      const emotion =
-        session.dominantEmotion || "Neutral";
-
-      const emojiMap = {
-        Happy: "😊",
-        Calm: "😌",
-        Neutral: "😐",
-        Anxious: "😟",
-        Stressed: "😣",
-        Sad: "😔",
-        Surprised: "😮",
-      };
-
-      return {
-        id: session.id,
-        date: startDate.toLocaleDateString(
-          "en-US",
-          {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          }
-        ),
-        timestamp: startDate.toISOString(),
-        time: startDate.toLocaleTimeString(
-          "en-US",
-          {
-            hour: "2-digit",
-            minute: "2-digit",
-          }
-        ),
-        duration: Math.max(
-          1,
-          Math.round(
-            Number(session.duration || 0) / 60
-          )
-        ),
-        emotion,
-        emoji: emojiMap[emotion] || "🙂",
-        score: Number(
-          session.wellbeingScore || 0
-        ),
-        confidence: Number(
-          session.confidence || 0
-        ),
-        status: session.status || "Completed",
-        note:
-          session.note ||
-          "Recorded from your monitoring session.",
-      };
-    });
-  }, []);
 
   const filteredSessions = useMemo(() => {
     let result = [...sessions];
@@ -159,6 +110,108 @@ function History() {
     setDateFilter(value);
     setCurrentPage(1);
   };
+  const getEmoji = (emotion) => {
+    switch (emotion.toLowerCase()) {
+      case "happy":
+        return "😊";
+      case "neutral":
+        return "😐";
+      case "sad":
+        return "😔";
+      case "anger":
+        return "😠";
+      case "calm":
+        return "😌";
+      case "stressed":
+        return "😣";
+      case "anxious":
+        return "😟";
+      case "surprised":
+        return "😮";
+      default:
+        return "🙂";
+    }
+  };
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        const response =
+          await getEmotionHistory();
+
+        const history =
+          response.data.history || [];
+
+        const mappedHistory =
+          history.map((item) => {
+            const date =
+              new Date(item.created_at);
+
+            const emotion =
+              item.emotion.charAt(0).toUpperCase() +
+              item.emotion.slice(1);
+
+            const confidence =
+              Math.round(
+                Number(item.confidence) * 100
+              );
+
+            return {
+              id: item.id,
+
+              date: date.toLocaleDateString(
+                "en-US",
+                {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                }
+              ),
+
+              timestamp: date.toISOString(),
+
+              time: date.toLocaleTimeString(
+                "en-US",
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              ),
+
+              emotion,
+
+              emoji: getEmoji(emotion),
+
+              duration: 1,
+
+              score: confidence,
+
+              confidence,
+
+              status: "Completed",
+
+              note:
+                "Emotion recorded from monitoring session.",
+
+              mediaPath:
+                item.media_path,
+            };
+          });
+
+        setSessions(mappedHistory);
+        setCurrentPage(1);
+      } catch (error) {
+        console.error(
+          "Failed to load emotion history:",
+          error
+        );
+        setSessions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadHistory();
+  }, []);
 
   return (
     <main className="history-page">
@@ -281,7 +334,7 @@ function History() {
                   ? Math.round(
                     sessions.reduce(
                       (total, session) =>
-                        total + Number(session.wellbeingScore || 0),
+                        total + Number(session.score || 0),
                       0
                     ) / sessions.length
                   )
@@ -353,11 +406,12 @@ function History() {
                   </option>
 
                   <option>Happy</option>
-                  <option>Sad</option>
-                  <option>Neutral</option>
-                  <option>Anxious</option>
-                  <option>Stressed</option>
-                  <option>Calm</option>
+<option>Sad</option>
+<option>Neutral</option>
+<option>Anger</option>
+<option>Surprised</option>
+<option>Fear</option>
+<option>Disgust</option>
                 </select>
 
                 <ChevronDown size={14} />
@@ -438,7 +492,11 @@ function History() {
                 <span />
               </div>
 
-              {visibleSessions.length > 0 ? (
+              {loading ? (
+                <div className="history-empty">
+                  <strong>Loading history...</strong>
+                </div>
+              ) : visibleSessions.length > 0 ? (
                 visibleSessions.map((session) => (
                   <div
                     className="history-table__row"
@@ -450,24 +508,16 @@ function History() {
                       </div>
 
                       <div>
-                        <strong>
-                          {session.date}
-                        </strong>
+                        <strong>{session.date}</strong>
 
-                        <span>
-                          {session.time}
-                        </span>
+                        <span>{session.time}</span>
                       </div>
                     </div>
 
                     <div className="history-emotion">
-                      <span>
-                        {session.emoji}
-                      </span>
+                      <span>{session.emoji}</span>
 
-                      <strong>
-                        {session.emotion}
-                      </strong>
+                      <strong>{session.emotion}</strong>
                     </div>
 
                     <div className="history-duration">
@@ -477,9 +527,7 @@ function History() {
                     </div>
 
                     <div className="history-score">
-                      <strong>
-                        {session.score}
-                      </strong>
+                      <strong>{session.score}</strong>
 
                       <div>
                         <span
