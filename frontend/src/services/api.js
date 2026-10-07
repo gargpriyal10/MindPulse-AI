@@ -269,8 +269,9 @@ export const getEmotionTrends = async () => {
   return mockRequest(emotionTrends);
 };
 
-export const getReportSummary = async () => {
-  return mockRequest(reportSummary);
+export const getEmotionSummary = async () => {
+  const response = await apiClient.get("/reports");
+  return response;
 };
 
 // ------------------------------------------------------------
@@ -295,6 +296,16 @@ export const markNotificationAsRead = async (notificationId) => {
     notificationId,
     read: true,
   });
+};
+
+export const getEmotionReport = async (period = "week") => {
+  const response = await apiClient.get("/reports", {
+    params: {
+      period,
+    },
+  });
+
+  return response;
 };
 
 // ------------------------------------------------------------

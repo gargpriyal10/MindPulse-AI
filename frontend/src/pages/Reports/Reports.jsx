@@ -1,7 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
     Activity,
-    ArrowDownRight,
     ArrowUpRight,
     Brain,
     CalendarDays,
@@ -16,784 +15,307 @@ import {
 } from "lucide-react";
 
 import Card from "../../components/ui/Card";
-import { getMonitoringSessions } from "../../services/monitoringService";
-
+import { getEmotionReport } from "../../services/api";
 import "./Reports.css";
 
-const reportData = {
-    "This week": {
-        summary: {
-            wellbeing: 84,
-            sessions: 28,
-            confidence: 93,
-            duration: 18,
-        },
+const PERIODS = [
+    "This week",
+    "This month",
+    "Last 3 months",
+];
 
-        weekly: [
-            { label: "Mon", score: 76 },
-            { label: "Tue", score: 81 },
-            { label: "Wed", score: 79 },
-            { label: "Thu", score: 87 },
-            { label: "Fri", score: 91 },
-            { label: "Sat", score: 86 },
-            { label: "Sun", score: 84 },
-        ],
-
-        emotions: [
-            {
-                name: "Calm",
-                value: 42,
-                type: "teal",
-                emoji: "😌",
-            },
-            {
-                name: "Happy",
-                value: 28,
-                type: "purple",
-                emoji: "😊",
-            },
-            {
-                name: "Neutral",
-                value: 18,
-                type: "blue",
-                emoji: "😐",
-            },
-            {
-                name: "Anxious",
-                value: 7,
-                type: "coral",
-                emoji: "😟",
-            },
-            {
-                name: "Stressed",
-                value: 5,
-                type: "red",
-                emoji: "😣",
-            },
-        ],
-
-        balance: {
-            calm: 82,
-            stress: 22,
-        },
-
-        monthly: [
-            { label: "May", score: 72 },
-            { label: "Jun", score: 77 },
-            { label: "Jul", score: 81 },
-            { label: "Aug", score: 84 },
-        ],
-
-        trend: 6.4,
-
-        insight:
-            "Your emotional balance is trending positively. Calm and positive emotional states have appeared more frequently across your recent sessions.",
+const EMOTION_META = {
+    anger: {
+        type: "red",
+        emoji: "😠",
     },
-
-    "This month": {
-        summary: {
-            wellbeing: 88,
-            sessions: 112,
-            confidence: 94,
-            duration: 19,
-        },
-
-        weekly: [
-            { label: "Week 1", score: 72 },
-            { label: "Week 2", score: 77 },
-            { label: "Week 3", score: 82 },
-            { label: "Week 4", score: 88 },
-        ],
-
-        emotions: [
-            {
-                name: "Calm",
-                value: 45,
-                type: "teal",
-                emoji: "😌",
-            },
-            {
-                name: "Happy",
-                value: 25,
-                type: "purple",
-                emoji: "😊",
-            },
-            {
-                name: "Neutral",
-                value: 17,
-                type: "blue",
-                emoji: "😐",
-            },
-            {
-                name: "Anxious",
-                value: 8,
-                type: "coral",
-                emoji: "😟",
-            },
-            {
-                name: "Stressed",
-                value: 5,
-                type: "red",
-                emoji: "😣",
-            },
-        ],
-
-        balance: {
-            calm: 85,
-            stress: 18,
-        },
-
-        monthly: [
-            { label: "Week 1", score: 72 },
-            { label: "Week 2", score: 77 },
-            { label: "Week 3", score: 82 },
-            { label: "Week 4", score: 88 },
-        ],
-
-        trend: 10.2,
-
-        insight:
-            "Your emotional balance has improved consistently throughout the month, with calm signals becoming increasingly dominant.",
+    neutral: {
+        type: "blue",
+        emoji: "😐",
     },
-
-    "Last 3 months": {
-        summary: {
-            wellbeing: 84,
-            sessions: 326,
-            confidence: 92,
-            duration: 18,
-        },
-
-        weekly: [
-            { label: "May", score: 72 },
-            { label: "Jun", score: 77 },
-            { label: "Jul", score: 81 },
-            { label: "Aug", score: 84 },
-        ],
-
-        emotions: [
-            {
-                name: "Calm",
-                value: 48,
-                type: "teal",
-                emoji: "😌",
-            },
-            {
-                name: "Happy",
-                value: 24,
-                type: "purple",
-                emoji: "😊",
-            },
-            {
-                name: "Neutral",
-                value: 16,
-                type: "blue",
-                emoji: "😐",
-            },
-            {
-                name: "Anxious",
-                value: 7,
-                type: "coral",
-                emoji: "😟",
-            },
-            {
-                name: "Stressed",
-                value: 5,
-                type: "red",
-                emoji: "😣",
-            },
-        ],
-
-        balance: {
-            calm: 82,
-            stress: 22,
-        },
-
-        monthly: [
-            { label: "May", score: 72 },
-            { label: "Jun", score: 77 },
-            { label: "Jul", score: 81 },
-            { label: "Aug", score: 84 },
-        ],
-
-        trend: 16.7,
-
-        insight:
-            "Your long-term emotional trajectory shows steady improvement, with stronger calm signals and a gradual reduction in stress.",
+    happiness: {
+        type: "purple",
+        emoji: "😊",
+    },
+    happy: {
+        type: "purple",
+        emoji: "😊",
+    },
+    sadness: {
+        type: "coral",
+        emoji: "😔",
+    },
+    sad: {
+        type: "coral",
+        emoji: "😔",
+    },
+    fear: {
+        type: "coral",
+        emoji: "😟",
+    },
+    surprise: {
+        type: "teal",
+        emoji: "😮",
+    },
+    disgust: {
+        type: "red",
+        emoji: "😣",
+    },
+    calm: {
+        type: "teal",
+        emoji: "😌",
+    },
+    anxious: {
+        type: "coral",
+        emoji: "😟",
+    },
+    stressed: {
+        type: "red",
+        emoji: "😣",
     },
 };
 
+function formatEmotionName(emotion) {
+    if (!emotion) {
+        return "Unknown";
+    }
 
-function getPeriodStart(period) {
-    const now = new Date();
-    const days =
-        period === "This week"
-            ? 7
-            : period === "This month"
-                ? 30
-                : 90;
-
-    const start = new Date(now);
-    start.setHours(0, 0, 0, 0);
-    start.setDate(start.getDate() - (days - 1));
-
-    return start;
+    return emotion.charAt(0).toUpperCase() + emotion.slice(1);
 }
 
-function getCompletedSessions(period) {
-    const sessions = getMonitoringSessions();
-
-    const start = getPeriodStart(period);
-
-    return sessions
-        .filter((session) => {
-            if (session.status !== "Completed") {
-                return false;
-            }
-
-            const dateValue =
-                session.endedAt ||
-                session.startedAt;
-
-            if (!dateValue) {
-                return false;
-            }
-
-            const date = new Date(dateValue);
-
-            return (
-                !Number.isNaN(date.getTime()) &&
-                date >= start
-            );
-        })
-        .sort(
-            (a, b) =>
-                new Date(
-                    b.endedAt || b.startedAt
-                ) -
-                new Date(
-                    a.endedAt || a.startedAt
-                )
-        );
+function getEmotionMeta(emotion) {
+    return (
+        EMOTION_META[emotion?.toLowerCase()] || {
+            type: "blue",
+            emoji: "🙂",
+        }
+    );
 }
 
-function getSessionEmotionTotals(sessions) {
-    const totals = {
-        Calm: 0,
-        Happy: 0,
-        Neutral: 0,
-        Anxious: 0,
-        Stressed: 0,
-        Sad: 0,
+function createDonutGradient(emotions) {
+    if (!emotions.length) {
+        return "conic-gradient(#E2E8F0 0deg 360deg)";
+    }
+
+    const colors = {
+        teal: "#14B8A6",
+        purple: "#C084FC",
+        blue: "#60A5FA",
+        coral: "#FB7185",
+        red: "#F43F5E",
     };
 
-    sessions.forEach((session) => {
-        const emotions = session.emotions || {};
+    let currentDegree = 0;
 
-        const values = Object.entries(totals).map(
-            ([name]) => Number(emotions[name]) || 0
-        );
+    const segments = emotions.map((emotion) => {
+        const start = currentDegree;
 
-        const total = values.reduce(
-            (sum, value) => sum + value,
-            0
-        );
+        currentDegree +=
+            (Number(emotion.value) / 100) * 360;
 
-        if (total > 0) {
-            Object.keys(totals).forEach((name) => {
-                totals[name] +=
-                    Number(emotions[name]) || 0;
-            });
-            return;
-        }
-
-        if (
-            session.dominantEmotion &&
-            Object.prototype.hasOwnProperty.call(
-                totals,
-                session.dominantEmotion
-            )
-        ) {
-            totals[session.dominantEmotion] += 1;
-        }
+        return `${colors[emotion.type] || colors.blue} ${start}deg ${currentDegree}deg`;
     });
 
-    const total = Object.values(totals).reduce(
-        (sum, value) => sum + value,
-        0
-    );
-
-    if (!total) {
-        return Object.fromEntries(
-            Object.keys(totals).map((name) => [
-                name,
-                0,
-            ])
-        );
-    }
-
-    return Object.fromEntries(
-        Object.entries(totals).map(
-            ([name, value]) => [
-                name,
-                Math.round((value / total) * 100),
-            ]
-        )
-    );
+    return `conic-gradient(${segments.join(", ")})`;
 }
 
-function createEmotionData(sessions) {
-    const totals =
-        getSessionEmotionTotals(sessions);
+function getAverageConfidence(report) {
+    const confidence =
+        Number(report?.report?.average_confidence) || 0;
 
-    const emotionMeta = {
-        Calm: {
-            type: "teal",
-            emoji: "😌",
-        },
-        Happy: {
-            type: "purple",
-            emoji: "😊",
-        },
-        Neutral: {
-            type: "blue",
-            emoji: "😐",
-        },
-        Anxious: {
-            type: "coral",
-            emoji: "😟",
-        },
-        Stressed: {
-            type: "red",
-            emoji: "😣",
-        },
-        Sad: {
-            type: "blue",
-            emoji: "😔",
-        },
-    };
-
-    return Object.entries(totals)
-        .filter(([name]) => name !== "Sad" || totals[name] > 0)
-        .map(([name, value]) => ({
-            name,
-            value,
-            ...emotionMeta[name],
-        }));
+    return (confidence * 100).toFixed(1);
 }
 
-function getAverage(sessions, key) {
-    if (!sessions.length) {
-        return 0;
-    }
+function buildEmotionData(report) {
+    const percentages =
+        report?.report?.emotion_percentages || {};
 
-    const values = sessions
-        .map((session) => Number(session[key]))
-        .filter((value) => Number.isFinite(value));
+    return Object.entries(percentages)
+        .map(([name, value]) => {
+            const meta = getEmotionMeta(name);
 
-    if (!values.length) {
-        return 0;
-    }
-
-    return Math.round(
-        values.reduce(
-            (sum, value) => sum + value,
-            0
-        ) / values.length
-    );
+            return {
+                name: formatEmotionName(name),
+                value: Number(value) || 0,
+                type: meta.type,
+                emoji: meta.emoji,
+            };
+        })
+        .sort((a, b) => b.value - a.value);
 }
 
-function createWeeklyData(sessions, period) {
-    if (!sessions.length) {
-        if (period === "This week") {
-            return [
-                { label: "Mon", score: 0 },
-                { label: "Tue", score: 0 },
-                { label: "Wed", score: 0 },
-                { label: "Thu", score: 0 },
-                { label: "Fri", score: 0 },
-                { label: "Sat", score: 0 },
-                { label: "Sun", score: 0 },
-            ];
-        }
+function buildChartData(report) {
+    const percentages =
+        report?.report?.emotion_percentages || {};
 
-        if (period === "This month") {
-            return [
-                { label: "Week 1", score: 0 },
-                { label: "Week 2", score: 0 },
-                { label: "Week 3", score: 0 },
-                { label: "Week 4", score: 0 },
-            ];
-        }
+    const entries = Object.entries(percentages);
 
+    if (!entries.length) {
         return [
-            { label: "May", score: 0 },
-            { label: "Jun", score: 0 },
-            { label: "Jul", score: 0 },
-            { label: "Aug", score: 0 },
+            { label: "No data", score: 0 },
         ];
     }
 
-    const now = new Date();
-
-    if (period === "This week") {
-        const days = Array.from(
-            { length: 7 },
-            (_, index) => {
-                const date = new Date(now);
-                date.setHours(0, 0, 0, 0);
-                date.setDate(
-                    now.getDate() - (6 - index)
-                );
-                return date;
-            }
-        );
-
-        return days.map((date) => {
-            const daySessions =
-                sessions.filter((session) => {
-                    const sessionDate = new Date(
-                        session.endedAt ||
-                        session.startedAt
-                    );
-
-                    return (
-                        sessionDate.getFullYear() ===
-                        date.getFullYear() &&
-                        sessionDate.getMonth() ===
-                        date.getMonth() &&
-                        sessionDate.getDate() ===
-                        date.getDate()
-                    );
-                });
-
-            return {
-                label: date.toLocaleDateString(
-                    "en-US",
-                    { weekday: "short" }
-                ),
-                score:
-                    getAverage(
-                        daySessions,
-                        "wellbeingScore"
-                    ) || 0,
-            };
-        });
-    }
-
-    if (period === "This month") {
-        return Array.from(
-            { length: 4 },
-            (_, index) => {
-                const end =
-                    index === 3
-                        ? 31
-                        : (index + 1) * 7;
-
-                const start =
-                    index * 7 + 1;
-
-                const weekSessions =
-                    sessions.filter((session) => {
-                        const date = new Date(
-                            session.endedAt ||
-                            session.startedAt
-                        );
-
-                        const day = date.getDate();
-
-                        return (
-                            day >= start &&
-                            day <= end
-                        );
-                    });
-
-                return {
-                    label: `Week ${index + 1}`,
-                    score:
-                        getAverage(
-                            weekSessions,
-                            "wellbeingScore"
-                        ) || 0,
-                };
-            }
-        );
-    }
-
-    const months = [];
-
-    for (let index = 3; index >= 0; index -= 1) {
-        const date = new Date(now);
-        date.setMonth(
-            now.getMonth() - index
-        );
-
-        const monthSessions =
-            sessions.filter((session) => {
-                const sessionDate = new Date(
-                    session.endedAt ||
-                    session.startedAt
-                );
-
-                return (
-                    sessionDate.getFullYear() ===
-                    date.getFullYear() &&
-                    sessionDate.getMonth() ===
-                    date.getMonth()
-                );
-            });
-
-        months.push({
-            label: date.toLocaleDateString(
-                "en-US",
-                { month: "short" }
-            ),
-            score:
-                getAverage(
-                    monthSessions,
-                    "wellbeingScore"
-                ) || 0,
-        });
-    }
-
-    return months;
-}
-
-function buildConnectedReportData(
-    sessions,
-    period
-) {
-    if (!sessions.length) {
-        return {
-            summary: {
-                wellbeing: 0,
-                sessions: 0,
-                confidence: 0,
-                duration: 0,
-            },
-
-            weekly: createWeeklyData(
-                [],
-                period
-            ),
-
-            emotions: [],
-
-            balance: {
-                positive: 0,
-                neutral: 0,
-                negative: 0,
-            },
-
-            monthly: [
-                { label: "May", score: 0 },
-                { label: "Jun", score: 0 },
-                { label: "Jul", score: 0 },
-                { label: "Aug", score: 0 },
-            ],
-
-            trend: 0,
-
-            insight:
-                "Complete a monitoring session to start building your emotional well-being report.",
-        };
-    }
-
-    const wellbeing =
-        getAverage(
-            sessions,
-            "wellbeingScore"
-        );
-
-    const confidence =
-        getAverage(
-            sessions,
-            "confidence"
-        );
-
-    const duration =
-        getAverage(
-            sessions,
-            "duration"
-        );
-
-    const emotions =
-        createEmotionData(sessions);
-
-    const calm =
-        emotions.find(
-            (emotion) =>
-                emotion.name === "Calm"
-        )?.value || 0;
-
-    const stress =
-        (emotions.find(
-            (emotion) =>
-                emotion.name === "Stressed"
-        )?.value || 0) +
-        (emotions.find(
-            (emotion) =>
-                emotion.name === "Anxious"
-        )?.value || 0);
-
-    const weekly =
-        createWeeklyData(
-            sessions,
-            period
-        );
-
-    const validScores = weekly
-        .map((item) => item.score)
-        .filter((score) => score > 0);
-
-    const average =
-        validScores.length
-            ? Math.round(
-                validScores.reduce(
-                    (sum, score) =>
-                        sum + score,
-                    0
-                ) /
-                validScores.length
-            )
-            : wellbeing;
-
-    const firstScore =
-        validScores[0] || wellbeing;
-
-    const trend =
-        firstScore > 0
-            ? Number(
-                (
-                    ((wellbeing -
-                        firstScore) /
-                        firstScore) *
-                    100
-                ).toFixed(1)
-            )
-            : 0;
-
-    return {
-        summary: {
-            wellbeing,
-            sessions: sessions.length,
-            confidence,
-            duration,
-        },
-
-        weekly,
-
-        emotions,
-
-        balance: {
-            calm,
-            stress,
-        },
-
-        monthly: weekly,
-
-        trend,
-
-        insight:
-            trend >= 0
-                ? "Your recent monitoring sessions show a positive emotional pattern. Continue using regular check-ins to understand how your well-being changes over time."
-                : "Your recent sessions show some changes in emotional balance. Regular check-ins can help you understand these patterns over time.",
-    };
+    return entries.map(([name, value]) => ({
+        label: formatEmotionName(name),
+        score: Number(value) || 0,
+    }));
 }
 
 function Reports() {
-    const [period, setPeriod] = useState("This week");
+    const [period, setPeriod] =
+        useState("This week");
+
+    const [report, setReport] =
+        useState(null);
+
+    const [loading, setLoading] =
+        useState(true);
+
+    const [error, setError] =
+        useState("");
+
     const [showExportToast, setShowExportToast] =
         useState(false);
 
-    const monitoringSessions =
-        useMemo(
-            () => getCompletedSessions(period),
-            [period]
-        );
+    // ============================================================
+    // FETCH REAL BACKEND REPORT
+    // ============================================================
 
-    const currentData = useMemo(
-        () =>
-            buildConnectedReportData(
-                monitoringSessions,
-                period
-            ),
-        [monitoringSessions, period]
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchReport = async () => {
+            try {
+                setLoading(true);
+                setError("");
+
+                const response =
+                    await getEmotionReport(
+                        period === "This week"
+                            ? "week"
+                            : period === "This month"
+                                ? "month"
+                                : "3months"
+                    );
+
+                console.log(
+                    "Reports API response:",
+                    response.data
+                );
+
+                if (!isMounted) {
+                    return;
+                }
+
+                setReport(response.data);
+            } catch (err) {
+                console.error(
+                    "Failed to fetch report:",
+                    err
+                );
+
+                if (!isMounted) {
+                    return;
+                }
+
+                setError(
+                    err.response?.data?.message ||
+                    "Unable to load your report."
+                );
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchReport();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [period]);
+
+    // ============================================================
+    // BACKEND DATA
+    // ============================================================
+
+    const backendReport =
+        report?.report || {};
+
+    const totalRecords =
+        Number(report?.total_records) || 0;
+
+    const averageConfidence =
+        getAverageConfidence(report);
+
+    const dominantEmotion =
+        backendReport.dominant_emotion ||
+        "No data";
+
+    const latestEmotion =
+        backendReport.latest_emotion ||
+        "No data";
+
+    const firstSession =
+        backendReport.first_session ||
+        "No data";
+
+    const latestSession =
+        backendReport.latest_session ||
+        "No data";
+
+    const emotionData = useMemo(
+        () => buildEmotionData(report),
+        [report]
     );
 
-    const averageScore = currentData.summary.wellbeing;
+    const chartData = useMemo(
+        () => buildChartData(report),
+        [report]
+    );
 
-    const chartPoints = useMemo(() => {
-        const data = currentData.weekly;
+    const highestEmotion =
+        emotionData.length
+            ? emotionData[0]
+            : null;
 
-        if (data.length === 1) {
-            return "50,50";
-        }
+    // ============================================================
+    // REPORT VALUES
+    // ============================================================
 
-        return data
-            .map((item, index) => {
-                const x =
-                    (index / (data.length - 1)) * 100;
+    /*
+     * Current backend does not provide a separate
+     * well-being score.
+     *
+     * Therefore we use average AI confidence as the
+     * available overall score instead of inventing
+     * a diagnostic/well-being value.
+     */
 
-                const y = 100 - item.score;
+    const overallScore =
+        Number(backendReport.average_confidence)
+            ? Math.round(
+                Number(
+                    backendReport.average_confidence
+                ) * 100
+            )
+            : 0;
 
-                return `${x},${y}`;
-            })
-            .join(" ");
-    }, [currentData]);
+    const dominantPercentage =
+        emotionData.length
+            ? emotionData[0].value
+            : 0;
 
-    const areaPoints = useMemo(() => {
-        const data = currentData.weekly;
+    const secondEmotion =
+        emotionData.length > 1
+            ? emotionData[1]
+            : null;
 
-        if (data.length === 1) {
-            return "0,100 50,50 100,100";
-        }
-
-        const points = data
-            .map((item, index) => {
-                const x =
-                    (index / (data.length - 1)) * 100;
-
-                const y = 100 - item.score;
-
-                return `${x},${y}`;
-            })
-            .join(" ");
-
-        return `0,100 ${points} 100,100`;
-    }, [currentData]);
-
-    const buildReportPayload = () => {
-        return {
-            application: "MindPulse AI",
-            reportType:
-                "Emotion Recognition & Well-being Monitoring",
-            period,
-            exportedAt: new Date().toISOString(),
-            summary: currentData.summary,
-            weekly: currentData.weekly,
-            emotions: currentData.emotions,
-            emotionalBalance: currentData.balance,
-            monthly: currentData.monthly,
-            trend: currentData.trend,
-            insight: currentData.insight,
-            sessions: monitoringSessions.map(
-                (session) => ({
-                    id: session.id,
-                    startedAt: session.startedAt,
-                    endedAt: session.endedAt,
-                    duration: session.duration,
-                    dominantEmotion:
-                        session.dominantEmotion,
-                    wellbeingScore:
-                        session.wellbeingScore,
-                    confidence:
-                        session.confidence,
-                    status: session.status,
-                })
-            ),
-        };
-    };
+    // ============================================================
+    // EXPORT HELPERS
+    // ============================================================
 
     const downloadBlob = (
         content,
@@ -815,7 +337,9 @@ function Reports() {
         anchor.download = filename;
 
         document.body.appendChild(anchor);
+
         anchor.click();
+
         anchor.remove();
 
         URL.revokeObjectURL(url);
@@ -835,20 +359,48 @@ function Reports() {
     };
 
     const handleExportJson = () => {
-        const exportDate = new Date()
-            .toISOString()
-            .slice(0, 10);
+        if (!report) {
+            return;
+        }
 
-        const safePeriod = period.replace(
-            /\s+/g,
-            "_"
-        );
+        const exportDate =
+            new Date()
+                .toISOString()
+                .slice(0, 10);
 
-        const json = JSON.stringify(
-            buildReportPayload(),
-            null,
-            2
-        );
+        const safePeriod =
+            period.replace(
+                /\s+/g,
+                "_"
+            );
+
+        const exportData = {
+            application: "MindPulse AI",
+
+            reportType:
+                "Emotion Recognition & Well-being Monitoring",
+
+            period,
+
+            exportedAt:
+                new Date().toISOString(),
+
+            generatedAt:
+                report.generated_at,
+
+            totalRecords:
+                report.total_records,
+
+            report:
+                report.report,
+        };
+
+        const json =
+            JSON.stringify(
+                exportData,
+                null,
+                2
+            );
 
         downloadBlob(
             json,
@@ -864,40 +416,47 @@ function Reports() {
     };
 
     const handleExportCsv = () => {
-        const exportDate = new Date()
-            .toISOString()
-            .slice(0, 10);
+        if (!report) {
+            return;
+        }
 
-        const safePeriod = period.replace(
-            /\s+/g,
-            "_"
-        );
+        const exportDate =
+            new Date()
+                .toISOString()
+                .slice(0, 10);
+
+        const safePeriod =
+            period.replace(
+                /\s+/g,
+                "_"
+            );
+
+        const emotionCounts =
+            backendReport.emotion_counts ||
+            {};
+
+        const emotionPercentages =
+            backendReport.emotion_percentages ||
+            {};
 
         const headers = [
-            "Session ID",
-            "Started At",
-            "Ended At",
-            "Duration (minutes)",
-            "Dominant Emotion",
-            "Well-being Score",
-            "AI Confidence",
-            "Status",
+            "Emotion",
+            "Count",
+            "Percentage",
         ];
 
         const rows =
-            monitoringSessions.map(
-                (session) => [
-                    session.id,
-                    session.startedAt,
-                    session.endedAt || "",
-                    session.duration,
-                    session.dominantEmotion ||
-                    "",
-                    session.wellbeingScore,
-                    session.confidence,
-                    session.status,
-                ]
-            );
+            Object.keys(
+                emotionPercentages
+            ).map((emotion) => [
+                formatEmotionName(
+                    emotion
+                ),
+                emotionCounts[emotion] || 0,
+                emotionPercentages[
+                emotion
+                ] || 0,
+            ]);
 
         const csv = [
             headers,
@@ -912,7 +471,7 @@ function Reports() {
 
         downloadBlob(
             csv,
-            `MindPulse_Sessions_${safePeriod}_${exportDate}.csv`,
+            `MindPulse_Emotion_Report_${safePeriod}_${exportDate}.csv`,
             "text/csv;charset=utf-8"
         );
 
@@ -923,20 +482,260 @@ function Reports() {
         }, 2500);
     };
 
+    // ============================================================
+    // LOADING
+    // ============================================================
+
+    if (loading) {
+        return (
+            <main className="reports-page">
+                <section
+                    className="reports-main"
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        minHeight: "100vh",
+                    }}
+                >
+                    <div>
+                        <h2>
+                            Loading report...
+                        </h2>
+
+                        <p>
+                            Fetching your latest
+                            emotion insights.
+                        </p>
+                    </div>
+                </section>
+            </main>
+        );
+    }
+
+    // ============================================================
+    // ERROR
+    // ============================================================
+
+    if (error) {
+        return (
+            <main className="reports-page">
+                <section
+                    className="reports-main"
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        minHeight: "100vh",
+                    }}
+                >
+                    <Card padding="medium">
+                        <div>
+                            <h2>
+                                Unable to load report
+                            </h2>
+
+                            <p>
+                                {error}
+                            </p>
+
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    window.location.reload()
+                                }
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    </Card>
+                </section>
+            </main>
+        );
+    }
+
+    // ============================================================
+    // NO DATA
+    // ============================================================
+
+    if (
+        !report ||
+        !report.success ||
+        totalRecords === 0
+    ) {
+        return (
+            <main className="reports-page">
+                <aside className="reports-sidebar">
+                    <a
+                        href="/"
+                        className="reports-brand"
+                    >
+                        <span className="reports-brand__icon">
+                            <Brain size={20} />
+                        </span>
+
+                        <span>
+                            MindPulse{" "}
+                            <strong>AI</strong>
+                        </span>
+                    </a>
+
+                    <nav className="reports-nav">
+                        <span className="reports-nav__label">
+                            WORKSPACE
+                        </span>
+
+                        <a
+                            href="/dashboard"
+                            className="reports-nav__item"
+                        >
+                            <Activity size={17} />
+                            Overview
+                        </a>
+
+                        <a
+                            href="/monitoring"
+                            className="reports-nav__item"
+                        >
+                            <HeartPulse size={17} />
+                            Monitoring
+                        </a>
+
+                        <a
+                            href="/history"
+                            className="reports-nav__item"
+                        >
+                            <Clock3 size={17} />
+                            History
+                        </a>
+
+                        <a
+                            href="/reports"
+                            className="reports-nav__item reports-nav__item--active"
+                        >
+                            <TrendingUp size={17} />
+                            Reports
+                        </a>
+
+                        <span className="reports-nav__label reports-nav__label--second">
+                            ACCOUNT
+                        </span>
+
+                        <a
+                            href="/profile"
+                            className="reports-nav__item"
+                        >
+                            <HeartPulse size={17} />
+                            Profile
+                        </a>
+
+                        <a
+                            href="/settings"
+                            className="reports-nav__item"
+                        >
+                            <ShieldCheck size={17} />
+                            Settings
+                        </a>
+                    </nav>
+
+                    <div className="reports-sidebar__bottom">
+                        <div className="reports-sidebar__privacy">
+                            <ShieldCheck size={15} />
+
+                            <span>
+                                Your emotional insights
+                                remain private and under
+                                your control.
+                            </span>
+                        </div>
+                    </div>
+                </aside>
+
+                <section className="reports-main">
+                    <header className="reports-header">
+                        <div>
+                            <span className="reports-header__eyebrow">
+                                ANALYTICS
+                            </span>
+
+                            <h1>
+                                Reports & Analytics
+                            </h1>
+
+                            <p>
+                                Understand your
+                                emotional patterns
+                                and well-being trends.
+                            </p>
+                        </div>
+
+                        <div className="reports-header__actions">
+                            <div className="reports-period">
+                                <CalendarDays size={14} />
+
+                                <select
+                                    value={period}
+                                    onChange={(event) =>
+                                        setPeriod(event.target.value)
+                                    }
+                                >
+                                    {PERIODS.map((item) => (
+                                        <option key={item}>
+                                            {item}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                <ChevronDown size={13} />
+                            </div>
+                        </div>
+                    </header>
+
+                    <Card padding="medium">
+                        <div>
+                            <h2>
+                                No report data available
+                            </h2>
+
+                            <p>
+                                Complete a monitoring
+                                session to start
+                                building your emotion
+                                report.
+                            </p>
+
+                            <a href="/monitoring">
+                                Go to Monitoring
+                            </a>
+                        </div>
+                    </Card>
+                </section>
+            </main>
+        );
+    }
+
+    // ============================================================
+    // MAIN UI
+    // ============================================================
+
     return (
         <main className="reports-page">
             {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
+                SIDEBAR
+            ===================================================== */}
 
             <aside className="reports-sidebar">
-                <a href="/" className="reports-brand">
+                <a
+                    href="/"
+                    className="reports-brand"
+                >
                     <span className="reports-brand__icon">
                         <Brain size={20} />
                     </span>
 
                     <span>
-                        MindPulse <strong>AI</strong>
+                        MindPulse{" "}
+                        <strong>AI</strong>
                     </span>
                 </a>
 
@@ -1003,16 +802,17 @@ function Reports() {
                         <ShieldCheck size={15} />
 
                         <span>
-                            Your emotional insights remain private
-                            and under your control.
+                            Your emotional insights
+                            remain private and under
+                            your control.
                         </span>
                     </div>
                 </div>
             </aside>
 
             {/* =====================================================
-          MAIN
-      ===================================================== */}
+                MAIN
+            ===================================================== */}
 
             <section className="reports-main">
                 {/* HEADER */}
@@ -1023,11 +823,14 @@ function Reports() {
                             ANALYTICS
                         </span>
 
-                        <h1>Reports & Analytics</h1>
+                        <h1>
+                            Reports & Analytics
+                        </h1>
 
                         <p>
-                            Understand your emotional patterns and
-                            well-being trends.
+                            Understand your emotional
+                            patterns and well-being
+                            trends.
                         </p>
                     </div>
 
@@ -1038,22 +841,34 @@ function Reports() {
                             <select
                                 value={period}
                                 onChange={(event) =>
-                                    setPeriod(event.target.value)
+                                    setPeriod(
+                                        event.target.value
+                                    )
                                 }
                             >
-                                <option>This week</option>
-                                <option>This month</option>
-                                <option>Last 3 months</option>
+                                {PERIODS.map(
+                                    (item) => (
+                                        <option
+                                            key={item}
+                                        >
+                                            {item}
+                                        </option>
+                                    )
+                                )}
                             </select>
 
-                            <ChevronDown size={13} />
+                            <ChevronDown
+                                size={13}
+                            />
                         </div>
 
                         <div className="reports-export-group">
                             <button
                                 type="button"
                                 className="reports-export"
-                                onClick={handleExportJson}
+                                onClick={
+                                    handleExportJson
+                                }
                             >
                                 <Download size={13} />
                                 JSON
@@ -1062,7 +877,9 @@ function Reports() {
                             <button
                                 type="button"
                                 className="reports-export reports-export--secondary"
-                                onClick={handleExportCsv}
+                                onClick={
+                                    handleExportCsv
+                                }
                             >
                                 <Download size={13} />
                                 CSV
@@ -1076,13 +893,15 @@ function Reports() {
                 {showExportToast && (
                     <div className="reports-export-toast">
                         <ShieldCheck size={14} />
-                        Report export prepared successfully.
+
+                        Report export prepared
+                        successfully.
                     </div>
                 )}
 
                 {/* =================================================
-            SUMMARY
-        ================================================= */}
+                    SUMMARY
+                ================================================= */}
 
                 <section className="reports-summary-grid">
                     <Card
@@ -1090,47 +909,34 @@ function Reports() {
                         padding="medium"
                     >
                         <div className="reports-summary-card__top">
-                            <span>WELL-BEING SCORE</span>
+                            <span>
+                                AI CONFIDENCE
+                            </span>
 
                             <div>
-                                <HeartPulse size={15} />
-                            </div>
-                        </div>
-
-                        <div className="reports-summary-card__value">
-                            <strong>{averageScore}</strong>
-                            <span>/ 100</span>
-                        </div>
-
-                        <div className="reports-summary-card__trend reports-summary-card__trend--positive">
-                            <ArrowUpRight size={12} />
-                            <strong>+{currentData.trend}%</strong>
-                            <span>vs previous period</span>
-                        </div>
-                    </Card>
-
-                    <Card
-                        className="reports-summary-card"
-                        padding="medium"
-                    >
-                        <div className="reports-summary-card__top">
-                            <span>SESSIONS</span>
-
-                            <div>
-                                <Activity size={15} />
+                                <Brain size={15} />
                             </div>
                         </div>
 
                         <div className="reports-summary-card__value">
                             <strong>
-                                {currentData.summary.sessions}
+                                {averageConfidence}
                             </strong>
+
+                            <span>%</span>
                         </div>
 
-                        <div className="reports-summary-card__trend">
-                            <TrendingUp size={12} />
+                        <div className="reports-summary-card__trend reports-summary-card__trend--positive">
+                            <ArrowUpRight
+                                size={12}
+                            />
+
+                            <strong>
+                                AI analyzed
+                            </strong>
+
                             <span>
-                                completed monitoring sessions
+                                emotion records
                             </span>
                         </div>
                     </Card>
@@ -1140,24 +946,28 @@ function Reports() {
                         padding="medium"
                     >
                         <div className="reports-summary-card__top">
-                            <span>AI CONFIDENCE</span>
+                            <span>
+                                TOTAL RECORDS
+                            </span>
 
                             <div>
-                                <Brain size={15} />
+                                <Activity size={15} />
                             </div>
                         </div>
 
                         <div className="reports-summary-card__value">
                             <strong>
-                                {currentData.summary.confidence}
+                                {totalRecords}
                             </strong>
-                            <span>%</span>
                         </div>
 
-                        <div className="reports-summary-card__trend reports-summary-card__trend--positive">
-                            <ArrowUpRight size={12} />
-                            <strong>High</strong>
-                            <span>model confidence</span>
+                        <div className="reports-summary-card__trend">
+                            <TrendingUp size={12} />
+
+                            <span>
+                                emotion records
+                                analyzed
+                            </span>
                         </div>
                     </Card>
 
@@ -1166,7 +976,40 @@ function Reports() {
                         padding="medium"
                     >
                         <div className="reports-summary-card__top">
-                            <span>AVG. SESSION</span>
+                            <span>
+                                DOMINANT EMOTION
+                            </span>
+
+                            <div>
+                                <HeartPulse size={15} />
+                            </div>
+                        </div>
+
+                        <div className="reports-summary-card__value">
+                            <strong>
+                                {formatEmotionName(
+                                    dominantEmotion
+                                )}
+                            </strong>
+                        </div>
+
+                        <div className="reports-summary-card__trend reports-summary-card__trend--positive">
+                            <span>
+                                {dominantPercentage}%
+                                of detected
+                                emotions
+                            </span>
+                        </div>
+                    </Card>
+
+                    <Card
+                        className="reports-summary-card"
+                        padding="medium"
+                    >
+                        <div className="reports-summary-card__top">
+                            <span>
+                                LATEST EMOTION
+                            </span>
 
                             <div>
                                 <Clock3 size={15} />
@@ -1175,49 +1018,81 @@ function Reports() {
 
                         <div className="reports-summary-card__value">
                             <strong>
-                                {currentData.summary.duration}
+                                {formatEmotionName(
+                                    latestEmotion
+                                )}
                             </strong>
-                            <span>min</span>
                         </div>
 
                         <div className="reports-summary-card__trend">
-                            <span>average monitoring duration</span>
+                            <span>
+                                Latest recorded
+                                emotion
+                            </span>
                         </div>
                     </Card>
                 </section>
 
                 {/* =================================================
-            CHARTS
-        ================================================= */}
+                    CHARTS
+                ================================================= */}
 
                 <section className="reports-chart-grid">
+                    {/* EMOTION OVERVIEW */}
+
                     <Card padding="medium">
                         <div className="reports-card-header">
                             <div>
-                                <span>EMOTIONAL TREND</span>
+                                <span>
+                                    EMOTION OVERVIEW
+                                </span>
 
-                                <h2>Well-being over time</h2>
+                                <h2>
+                                    Detected emotions
+                                </h2>
 
                                 <p>
-                                    Your emotional well-being score for{" "}
-                                    {period.toLowerCase()}.
+                                    Emotional states
+                                    detected across
+                                    your recorded
+                                    sessions.
                                 </p>
                             </div>
 
                             <div className="reports-trend-badge">
-                                <ArrowUpRight size={12} />
-                                +{currentData.trend}%
+                                <Activity
+                                    size={12}
+                                />
+
+                                {totalRecords} records
                             </div>
                         </div>
 
                         <div className="reports-line-chart">
                             <div className="reports-chart-y-axis">
-                                <span>100</span>
-                                <span>80</span>
-                                <span>60</span>
-                                <span>40</span>
-                                <span>20</span>
-                                <span>0</span>
+                                <span>
+                                    100
+                                </span>
+
+                                <span>
+                                    80
+                                </span>
+
+                                <span>
+                                    60
+                                </span>
+
+                                <span>
+                                    40
+                                </span>
+
+                                <span>
+                                    20
+                                </span>
+
+                                <span>
+                                    0
+                                </span>
                             </div>
 
                             <div className="reports-chart-area">
@@ -1235,60 +1110,36 @@ function Reports() {
                                     viewBox="0 0 100 100"
                                     preserveAspectRatio="none"
                                 >
-                                    <defs>
-                                        <linearGradient
-                                            id="reportsAreaGradient"
-                                            x1="0"
-                                            y1="0"
-                                            x2="0"
-                                            y2="1"
-                                        >
-                                            <stop
-                                                offset="0%"
-                                                stopColor="#14B8A6"
-                                                stopOpacity="0.22"
-                                            />
-
-                                            <stop
-                                                offset="100%"
-                                                stopColor="#14B8A6"
-                                                stopOpacity="0"
-                                            />
-                                        </linearGradient>
-                                    </defs>
-
-                                    <polygon
-                                        points={areaPoints}
-                                        fill="url(#reportsAreaGradient)"
-                                    />
-
-                                    <polyline
-                                        points={chartPoints}
-                                        fill="none"
-                                        stroke="#14B8A6"
-                                        strokeWidth="2"
-                                        vectorEffect="non-scaling-stroke"
-                                    />
-
-                                    {currentData.weekly.map(
-                                        (item, index) => {
-                                            const x =
-                                                currentData.weekly.length ===
+                                    {chartData.map(
+                                        (
+                                            item,
+                                            index
+                                        ) => {
+                                            const width =
+                                                chartData.length >
                                                     1
-                                                    ? 50
-                                                    : (index /
-                                                        (currentData.weekly.length -
-                                                            1)) *
-                                                    100;
+                                                    ? 100 /
+                                                    (chartData.length -
+                                                        1)
+                                                    : 50;
 
-                                            const y = 100 - item.score;
+                                            const x =
+                                                chartData.length >
+                                                    1
+                                                    ? index *
+                                                    width
+                                                    : 50;
+
+                                            const y =
+                                                100 -
+                                                item.score;
 
                                             return (
                                                 <circle
                                                     key={`${item.label}-${index}`}
                                                     cx={x}
                                                     cy={y}
-                                                    r="1.5"
+                                                    r="2"
                                                     fill="#0F172A"
                                                     stroke="#14B8A6"
                                                     strokeWidth="1"
@@ -1297,43 +1148,94 @@ function Reports() {
                                             );
                                         }
                                     )}
+
+                                    {chartData.length >
+                                        1 && (
+                                            <polyline
+                                                points={chartData
+                                                    .map(
+                                                        (
+                                                            item,
+                                                            index
+                                                        ) => {
+                                                            const x =
+                                                                (index /
+                                                                    (chartData.length -
+                                                                        1)) *
+                                                                100;
+
+                                                            const y =
+                                                                100 -
+                                                                item.score;
+
+                                                            return `${x},${y}`;
+                                                        }
+                                                    )
+                                                    .join(
+                                                        " "
+                                                    )}
+                                                fill="none"
+                                                stroke="#14B8A6"
+                                                strokeWidth="2"
+                                                vectorEffect="non-scaling-stroke"
+                                            />
+                                        )}
                                 </svg>
 
                                 <div className="reports-chart-labels">
-                                    {currentData.weekly.map((item) => (
-                                        <span key={item.label}>
-                                            {item.label}
-                                        </span>
-                                    ))}
+                                    {chartData.map(
+                                        (item) => (
+                                            <span
+                                                key={
+                                                    item.label
+                                                }
+                                            >
+                                                {
+                                                    item.label
+                                                }
+                                            </span>
+                                        )
+                                    )}
                                 </div>
                             </div>
                         </div>
 
                         <div className="reports-chart-footer">
                             <div>
-                                <span>Average</span>
-                                <strong>{averageScore}</strong>
-                            </div>
+                                <span>
+                                    Average AI
+                                    confidence
+                                </span>
 
-                            <div>
-                                <span>Highest</span>
                                 <strong>
-                                    {Math.max(
-                                        ...currentData.weekly.map(
-                                            (item) => item.score
-                                        )
-                                    )}
+                                    {
+                                        averageConfidence
+                                    }
+                                    %
                                 </strong>
                             </div>
 
                             <div>
-                                <span>Lowest</span>
+                                <span>
+                                    Highest emotion
+                                </span>
+
                                 <strong>
-                                    {Math.min(
-                                        ...currentData.weekly.map(
-                                            (item) => item.score
-                                        )
-                                    )}
+                                    {highestEmotion
+                                        ? `${highestEmotion.name} ${highestEmotion.value}%`
+                                        : "—"}
+                                </strong>
+                            </div>
+
+                            <div>
+                                <span>
+                                    Second highest
+                                </span>
+
+                                <strong>
+                                    {secondEmotion
+                                        ? `${secondEmotion.name} ${secondEmotion.value}%`
+                                        : "—"}
                                 </strong>
                             </div>
                         </div>
@@ -1344,12 +1246,20 @@ function Reports() {
                     <Card padding="medium">
                         <div className="reports-card-header">
                             <div>
-                                <span>EMOTION DISTRIBUTION</span>
+                                <span>
+                                    EMOTION
+                                    DISTRIBUTION
+                                </span>
 
-                                <h2>How you've been feeling</h2>
+                                <h2>
+                                    How you've been
+                                    feeling
+                                </h2>
 
                                 <p>
-                                    Distribution of detected emotional
+                                    Distribution of
+                                    detected
+                                    emotional
                                     states.
                                 </p>
                             </div>
@@ -1359,185 +1269,281 @@ function Reports() {
                             <div
                                 className="reports-donut__ring"
                                 style={{
-                                    background: createDonutGradient(
-                                        currentData.emotions
-                                    ),
+                                    background:
+                                        createDonutGradient(
+                                            emotionData
+                                        ),
                                 }}
                             >
                                 <div className="reports-donut__center">
                                     <strong>
-                                        {currentData.summary.sessions}
+                                        {
+                                            totalRecords
+                                        }
                                     </strong>
 
-                                    <span>sessions</span>
+                                    <span>
+                                        records
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
                         <div className="reports-emotion-list">
-                            {currentData.emotions.map((emotion) => (
-                                <div
-                                    className="reports-emotion-item"
-                                    key={emotion.name}
-                                >
-                                    <div className="reports-emotion-item__name">
-                                        <span
-                                            className={`reports-emotion-dot reports-emotion-dot--${emotion.type}`}
-                                        />
-
-                                        <span>{emotion.name}</span>
-
-                                        <strong>
-                                            {emotion.emoji}
-                                        </strong>
-                                    </div>
-
-                                    <div className="reports-emotion-item__value">
-                                        <div>
+                            {emotionData.map(
+                                (emotion) => (
+                                    <div
+                                        className="reports-emotion-item"
+                                        key={
+                                            emotion.name
+                                        }
+                                    >
+                                        <div className="reports-emotion-item__name">
                                             <span
-                                                className={`reports-emotion-bar reports-emotion-bar--${emotion.type}`}
-                                                style={{
-                                                    width: `${emotion.value}%`,
-                                                }}
+                                                className={`reports-emotion-dot reports-emotion-dot--${emotion.type}`}
                                             />
+
+                                            <span>
+                                                {
+                                                    emotion.name
+                                                }
+                                            </span>
+
+                                            <strong>
+                                                {
+                                                    emotion.emoji
+                                                }
+                                            </strong>
                                         </div>
 
-                                        <strong>{emotion.value}%</strong>
+                                        <div className="reports-emotion-item__value">
+                                            <div>
+                                                <span
+                                                    className={`reports-emotion-bar reports-emotion-bar--${emotion.type}`}
+                                                    style={{
+                                                        width: `${emotion.value}%`,
+                                                    }}
+                                                />
+                                            </div>
+
+                                            <strong>
+                                                {
+                                                    emotion.value
+                                                }
+                                                %
+                                            </strong>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                )
+                            )}
                         </div>
                     </Card>
                 </section>
 
                 {/* =================================================
-            SECONDARY
-        ================================================= */}
+                    SECONDARY
+                ================================================= */}
 
                 <section className="reports-secondary-grid">
+                    {/* EMOTIONAL BALANCE */}
+
                     <Card padding="medium">
                         <div className="reports-card-header">
                             <div>
-                                <span>EMOTIONAL BALANCE</span>
+                                <span>
+                                    EMOTIONAL
+                                    BALANCE
+                                </span>
 
-                                <h2>Calm vs. stress</h2>
+                                <h2>
+                                    Emotion signals
+                                </h2>
 
                                 <p>
-                                    Compare your positive and stressful
+                                    Compare the
+                                    strongest detected
                                     emotional signals.
                                 </p>
                             </div>
                         </div>
 
                         <div className="reports-balance-bars">
-                            <div className="reports-balance-row">
-                                <div>
-                                    <span>
-                                        <i className="reports-balance-dot reports-balance-dot--calm" />
-                                        Calm
-                                    </span>
+                            {emotionData
+                                .slice(0, 2)
+                                .map((emotion) => (
+                                    <div
+                                        className="reports-balance-row"
+                                        key={
+                                            emotion.name
+                                        }
+                                    >
+                                        <div>
+                                            <span>
+                                                <i
+                                                    className={`reports-balance-dot reports-balance-dot--${emotion.type}`}
+                                                />
 
-                                    <strong>
-                                        {currentData.balance.calm}%
-                                    </strong>
-                                </div>
+                                                {
+                                                    emotion.name
+                                                }
+                                            </span>
 
-                                <div className="reports-balance-track">
-                                    <span
-                                        className="reports-balance-fill reports-balance-fill--calm"
-                                        style={{
-                                            width: `${currentData.balance.calm}%`,
-                                        }}
-                                    />
-                                </div>
-                            </div>
+                                            <strong>
+                                                {
+                                                    emotion.value
+                                                }
+                                                %
+                                            </strong>
+                                        </div>
 
-                            <div className="reports-balance-row">
-                                <div>
-                                    <span>
-                                        <i className="reports-balance-dot reports-balance-dot--stress" />
-                                        Stress
-                                    </span>
-
-                                    <strong>
-                                        {currentData.balance.stress}%
-                                    </strong>
-                                </div>
-
-                                <div className="reports-balance-track">
-                                    <span
-                                        className="reports-balance-fill reports-balance-fill--stress"
-                                        style={{
-                                            width: `${currentData.balance.stress}%`,
-                                        }}
-                                    />
-                                </div>
-                            </div>
+                                        <div className="reports-balance-track">
+                                            <span
+                                                className={`reports-balance-fill reports-balance-fill--${emotion.type}`}
+                                                style={{
+                                                    width: `${emotion.value}%`,
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                ))}
                         </div>
 
                         <div className="reports-balance-result">
                             <div>
-                                <HeartPulse size={15} />
+                                <HeartPulse
+                                    size={15}
+                                />
                             </div>
 
                             <span>
-                                Your calm signals are currently{" "}
                                 <strong>
-                                    {Math.max(
-                                        currentData.balance.calm -
-                                        currentData.balance.stress,
-                                        0
+                                    {formatEmotionName(
+                                        dominantEmotion
                                     )}
-                                    % higher
                                 </strong>{" "}
-                                than your stress signals.
+                                is currently the
+                                dominant detected
+                                emotion at{" "}
+                                <strong>
+                                    {
+                                        dominantPercentage
+                                    }
+                                    %
+                                </strong>
+                                .
                             </span>
                         </div>
                     </Card>
 
+                    {/* REPORT DETAILS */}
+
                     <Card padding="medium">
                         <div className="reports-card-header">
                             <div>
-                                <span>LONG-TERM TREND</span>
+                                <span>
+                                    REPORT DETAILS
+                                </span>
 
-                                <h2>Well-being trajectory</h2>
+                                <h2>
+                                    Monitoring
+                                    timeline
+                                </h2>
 
                                 <p>
-                                    Progress across the selected period.
+                                    Key dates from
+                                    your recorded
+                                    emotion history.
                                 </p>
                             </div>
                         </div>
 
                         <div className="reports-monthly-chart">
-                            {currentData.monthly.map((item) => (
-                                <div
-                                    className="reports-month-column"
-                                    key={item.label}
-                                >
-                                    <span className="reports-month-value">
-                                        {item.score}
-                                    </span>
+                            <div className="reports-month-column">
+                                <span className="reports-month-value">
+                                    First
+                                </span>
 
-                                    <div className="reports-month-track">
-                                        <span
-                                            style={{
-                                                height: `${item.score}%`,
-                                            }}
-                                        />
-                                    </div>
-
-                                    <span className="reports-month-label">
-                                        {item.label}
-                                    </span>
+                                <div className="reports-month-track">
+                                    <span
+                                        style={{
+                                            height: "55%",
+                                        }}
+                                    />
                                 </div>
-                            ))}
+
+                                <span className="reports-month-label">
+                                    Session
+                                </span>
+                            </div>
+
+                            <div className="reports-month-column">
+                                <span className="reports-month-value">
+                                    Latest
+                                </span>
+
+                                <div className="reports-month-track">
+                                    <span
+                                        style={{
+                                            height: "85%",
+                                        }}
+                                    />
+                                </div>
+
+                                <span className="reports-month-label">
+                                    Session
+                                </span>
+                            </div>
+
+                            <div className="reports-month-column">
+                                <span className="reports-month-value">
+                                    {totalRecords}
+                                </span>
+
+                                <div className="reports-month-track">
+                                    <span
+                                        style={{
+                                            height: "70%",
+                                        }}
+                                    />
+                                </div>
+
+                                <span className="reports-month-label">
+                                    Records
+                                </span>
+                            </div>
+                        </div>
+
+                        <div
+                            style={{
+                                marginTop:
+                                    "20px",
+                                display:
+                                    "grid",
+                                gap: "10px",
+                                fontSize:
+                                    "13px",
+                            }}
+                        >
+                            <div>
+                                <strong>
+                                    First session:
+                                </strong>{" "}
+                                {firstSession}
+                            </div>
+
+                            <div>
+                                <strong>
+                                    Latest session:
+                                </strong>{" "}
+                                {latestSession}
+                            </div>
                         </div>
                     </Card>
                 </section>
 
                 {/* =================================================
-            AI INSIGHT
-        ================================================= */}
+                    AI INSIGHT
+                ================================================= */}
 
                 <Card
                     className="reports-ai-card"
@@ -1548,26 +1554,41 @@ function Reports() {
                     </div>
 
                     <div className="reports-ai-content">
-                        <span>AI WELL-BEING INSIGHT</span>
+                        <span>
+                            AI WELL-BEING INSIGHT
+                        </span>
 
-                        <h2>{currentData.insight}</h2>
+                        <h2>
+                            Your most frequently
+                            detected emotion is{" "}
+                            {formatEmotionName(
+                                dominantEmotion
+                            )}
+                            .
+                        </h2>
 
                         <p>
-                            MindPulse analyzes emotional patterns
-                            across your monitoring sessions to help
-                            you understand changes in your overall
-                            well-being.
+                            MindPulse AI analyzes
+                            emotional patterns from
+                            your monitoring records
+                            to help you understand
+                            changes in your emotional
+                            well-being over time.
                         </p>
 
                         <div className="reports-ai-tags">
                             <span>
-                                <TrendingUp size={11} />
-                                Positive trend
+                                <TrendingUp
+                                    size={11}
+                                />
+                                Emotion analyzed
                             </span>
 
                             <span>
-                                <HeartPulse size={11} />
-                                Balanced signals
+                                <HeartPulse
+                                    size={11}
+                                />
+                                Pattern insight
                             </span>
 
                             <span>
@@ -1584,10 +1605,12 @@ function Reports() {
                     <Info size={13} />
 
                     <span>
-                        MindPulse AI provides emotional pattern
-                        insights for self-awareness and is not a
-                        medical diagnostic system. These insights
-                        should not replace professional medical
+                        MindPulse AI provides
+                        emotional pattern insights
+                        for self-awareness and is not
+                        a medical diagnostic system.
+                        These insights should not
+                        replace professional medical
                         advice.
                     </span>
                 </div>
@@ -1596,40 +1619,19 @@ function Reports() {
 
                 <footer className="reports-footer">
                     <span>
-                        MindPulse AI • Emotion Recognition &
-                        Well-being Monitoring
+                        MindPulse AI • Emotion
+                        Recognition & Well-being
+                        Monitoring
                     </span>
 
                     <span>
-                        Privacy-first • Human-centric • 2026
+                        Privacy-first •
+                        Human-centric • 2026
                     </span>
                 </footer>
             </section>
         </main>
     );
-}
-
-function createDonutGradient(emotions) {
-    const colors = {
-        teal: "#14B8A6",
-        purple: "#C084FC",
-        blue: "#60A5FA",
-        coral: "#FB7185",
-        red: "#F43F5E",
-    };
-
-    let currentDegree = 0;
-
-    const segments = emotions.map((emotion) => {
-        const start = currentDegree;
-
-        currentDegree +=
-            (emotion.value / 100) * 360;
-
-        return `${colors[emotion.type]} ${start}deg ${currentDegree}deg`;
-    });
-
-    return `conic-gradient(${segments.join(", ")})`;
 }
 
 export default Reports;
