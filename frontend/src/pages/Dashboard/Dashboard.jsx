@@ -34,6 +34,10 @@ import {
   getCurrentUser,
   refreshCurrentUser,
 } from "../../services/auth";
+
+import {
+  getEmotionAnalytics,
+} from "../../services/api";
 import "./Dashboard.css";
 import { logout } from "../../services/auth";
 
@@ -230,9 +234,24 @@ function getTrendData(sessions) {
 
 function Dashboard() {
   const currentUser = getCurrentUser();
+  const [analyticsData, setAnalyticsData] = useState(null);
 
-  useEffect(() => {
+useEffect(() => {
   refreshCurrentUser();
+
+  const loadAnalytics = async () => {
+    try {
+      const response = await getEmotionAnalytics();
+
+      if (response.data?.success) {
+        setAnalyticsData(response.data);
+      }
+    } catch (error) {
+      console.error("Unable to load analytics:", error);
+    }
+  };
+
+  loadAnalytics();
 }, []);
 
   /* ============================================================
@@ -422,11 +441,44 @@ function Dashboard() {
       return `${x},${y}`;
     })
     .join(" ");
+  
+    const dominantEmotion =
+  analyticsData?.labels?.length > 0
+    ? (() => {
+        const index =
+          analyticsData.values.indexOf(
+            Math.max(...analyticsData.values)
+          );
 
-  const dominantEmotion =
-    getDominantEmotion(
-      monitoringSessions
-    );
+        const name =
+          analyticsData.labels[index];
+
+        const emojiMap = {
+          neutral: "😐",
+          anger: "😠",
+          happiness: "😊",
+          sadness: "😔",
+        };
+
+        return {
+          name:
+            name.charAt(0).toUpperCase() +
+            name.slice(1),
+          emoji:
+            emojiMap[name] || "🙂",
+          intensity:
+            analyticsData.total_sessions > 0
+              ? Math.round(
+                  (analyticsData.values[index] /
+                    analyticsData.total_sessions) *
+                    100
+                )
+              : 0,
+        };
+      })()
+    : getDominantEmotion(
+        monitoringSessions
+      );
 
   const latestSession =
     monitoringSessions[0];
@@ -460,42 +512,65 @@ function Dashboard() {
         ? wellbeingChange
         : 6.4,
     totalSessions:
-      monitoringSessions.length || 28,
+      analyticsData?.total_sessions ??
+      (monitoringSessions.length || 28),
     sessionsThisWeek:
       sessionsThisWeek.length ||
       0,
     dominantEmotion,
   };
 
-  const recentEmotions =
-    hasRealSessions
+  const analyticsEmotions =
+  analyticsData?.labels?.map((emotion, index) => ({
+    emotion:
+      emotion.charAt(0).toUpperCase() +
+      emotion.slice(1),
+    intensity:
+      analyticsData.total_sessions > 0
+        ? Math.round(
+            (analyticsData.values[index] /
+              analyticsData.total_sessions) *
+              100
+          )
+        : 0,
+    confidence:
+      Math.round(
+        analyticsData.average_confidence * 100
+      ),
+    trend: 0,
+  })) || [];
+
+const recentEmotions =
+  analyticsEmotions.length > 0
+    ? analyticsEmotions
+    : hasRealSessions
       ? emotionData
       : [
-        {
-          emotion: "Calm",
-          intensity: 76,
-          confidence: 93,
-          trend: 0,
-        },
-        {
-          emotion: "Happy",
-          intensity: 68,
-          confidence: 95,
-          trend: 0,
-        },
-        {
-          emotion: "Neutral",
-          intensity: 52,
-          confidence: 89,
-          trend: 0,
-        },
-        {
-          emotion: "Anxious",
-          intensity: 31,
-          confidence: 86,
-          trend: 0,
-        },
-      ];
+          {
+            emotion: "Calm",
+            intensity: 76,
+            confidence: 93,
+            trend: 0,
+          },
+          {
+            emotion: "Happy",
+            intensity: 68,
+            confidence: 95,
+            trend: 0,
+          },
+          {
+            emotion: "Neutral",
+            intensity: 52,
+            confidence: 89,
+            trend: 0,
+          },
+          {
+            emotion: "Anxious",
+            intensity: 31,
+            confidence: 86,
+            trend: 0,
+          },
+        ];
 
   const unreadCount = notificationList.filter(
     (notification) => !notification.read
@@ -1026,15 +1101,15 @@ function Dashboard() {
 
           <div className="dashboard-emotions">
 
-            {emotionData.map((item) => (
-              <EmotionCard
-                key={item.emotion}
-                {...item}
-                compact
-              />
-            ))}
+  {recentEmotions.map((item) => (
+    <EmotionCard
+      key={item.emotion}
+      {...item}
+      compact
+    />
+  ))}
 
-          </div>
+</div>
 
         </section>
 

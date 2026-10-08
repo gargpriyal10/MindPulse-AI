@@ -269,6 +269,12 @@ export const getEmotionTrends = async () => {
   return mockRequest(emotionTrends);
 };
 
+export const getEmotionAnalytics = async () => {
+  const response = await apiClient.get("/emotions/analytics");
+
+  return response;
+};
+
 export const getEmotionSummary = async () => {
   const response = await apiClient.get("/reports");
   return response;
