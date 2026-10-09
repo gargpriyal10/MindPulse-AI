@@ -167,6 +167,24 @@ export const getEmotionHistory = async () => {
   return response;
 };
 
+export const uploadEmotionImage = async (imageBlob) => {
+  const formData = new FormData();
+
+  formData.append("image", imageBlob, "camera-capture.jpg");
+
+  const response = await apiClient.post(
+    "/emotions/upload",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }
+  );
+
+  return response;
+};
+
 // ------------------------------------------------------------
 // Monitoring
 // ------------------------------------------------------------

@@ -35,6 +35,10 @@ import {
   finishMonitoringSession,
 } from "../../services/monitoringService";
 
+import {
+  uploadEmotionImage,
+} from "../../services/api";
+
 import "./Monitoring.css";
 
 function Monitoring() {
@@ -68,50 +72,22 @@ function Monitoring() {
 
   const [currentEmotion, setCurrentEmotion] =
     useState({
-      name: "Calm",
-      emoji: "😌",
-      confidence: 82,
-      intensity: 76,
+      name: "Neutral",
+      emoji: "😐",
+      confidence: 0,
+      intensity: 0,
     });
 
   const [emotionSignals, setEmotionSignals] =
     useState([
-      {
-        name: "Happy",
-        emoji: "😊",
-        value: 68,
-        color: "teal",
-      },
-      {
-        name: "Calm",
-        emoji: "😌",
-        value: 82,
-        color: "teal",
-      },
-      {
-        name: "Neutral",
-        emoji: "😐",
-        value: 47,
-        color: "lavender",
-      },
-      {
-        name: "Anxious",
-        emoji: "😟",
-        value: 24,
-        color: "coral",
-      },
-      {
-        name: "Stressed",
-        emoji: "😣",
-        value: 18,
-        color: "coral",
-      },
-      {
-        name: "Sad",
-        emoji: "😔",
-        value: 12,
-        color: "lavender",
-      },
+      { name: "Neutral", emoji: "😐", value: 0, color: "lavender" },
+      { name: "Happy", emoji: "😊", value: 0, color: "teal" },
+      { name: "Surprise", emoji: "😮", value: 0, color: "teal" },
+      { name: "Sad", emoji: "😔", value: 0, color: "lavender" },
+      { name: "Anger", emoji: "😠", value: 0, color: "coral" },
+      { name: "Disgust", emoji: "🤢", value: 0, color: "coral" },
+      { name: "Fear", emoji: "😨", value: 0, color: "coral" },
+      { name: "Contempt", emoji: "😒", value: 0, color: "lavender" },
     ]);
 
   /* ============================================================
@@ -452,6 +428,164 @@ function Monitoring() {
     isPaused,
   ]);
 
+
+  const captureCameraFrame = () => {
+    const video = videoRef.current;
+
+    if (!video || !cameraReady) {
+      return null;
+    }
+
+    const canvas = document.createElement("canvas");
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    const context = canvas.getContext("2d");
+
+    if (!context) {
+      return null;
+    }
+
+    context.drawImage(
+      video,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+
+    return new Promise((resolve) => {
+      canvas.toBlob(
+        (blob) => {
+          resolve(blob);
+        },
+        "image/jpeg",
+        0.85
+      );
+    });
+  };
+
+
+
+  const uploadCameraFrame = async () => {
+    try {
+      if (
+        !isMonitoring ||
+        isPaused ||
+        !cameraReady ||
+        faceStatus !== "detected"
+      ) {
+        return;
+      }
+
+      const imageBlob = await captureCameraFrame();
+
+      if (!imageBlob) {
+        console.error("Unable to capture camera frame.");
+        return;
+      }
+
+      const response = await uploadEmotionImage(imageBlob);
+      const result = response.data;
+
+      if (!result?.success) {
+        console.error("Emotion prediction was unsuccessful:", result);
+        return;
+      }
+
+      const emotionMap = {
+        neutral: { name: "Neutral", emoji: "😐" },
+        happiness: { name: "Happy", emoji: "😊" },
+        surprise: { name: "Surprise", emoji: "😮" },
+        sadness: { name: "Sad", emoji: "😔" },
+        anger: { name: "Anger", emoji: "😠" },
+        disgust: { name: "Disgust", emoji: "🤢" },
+        fear: { name: "Fear", emoji: "😨" },
+        contempt: { name: "Contempt", emoji: "😒" },
+      };
+
+      const emotionKey = result.emotion;
+      const emotion = emotionMap[emotionKey];
+
+      if (!emotion) {
+        console.error("Unknown emotion returned by backend:", emotionKey);
+        return;
+      }
+
+      const confidence = Math.round(
+        Number(result.confidence) * 100
+      );
+
+      setCurrentEmotion({
+        name: emotion.name,
+        emoji: emotion.emoji,
+        confidence,
+        intensity: confidence,
+      });
+
+      const signalMap = {
+        neutral: "Neutral",
+        happiness: "Happy",
+        surprise: "Surprise",
+        sadness: "Sad",
+        anger: "Anger",
+        disgust: "Disgust",
+        fear: "Fear",
+        contempt: "Contempt",
+      };
+
+      setEmotionSignals((previous) =>
+        previous.map((signal) => {
+          const key = Object.keys(signalMap).find(
+            (item) => signalMap[item] === signal.name
+          );
+
+          const score = key
+            ? Number(result.scores?.[key] ?? 0)
+            : 0;
+
+          return {
+            ...signal,
+            value: Math.round(score * 100),
+          };
+        })
+      );
+
+      console.log("Camera emotion prediction:", result);
+    } catch (error) {
+      console.error(
+        "Camera emotion upload failed:",
+        error.response?.data || error.message || error
+      );
+    }
+  };
+
+
+  useEffect(() => {
+    if (
+      !isMonitoring ||
+      isPaused ||
+      !cameraReady ||
+      faceStatus !== "detected"
+    ) {
+      return undefined;
+    }
+
+    const uploadTimer = setInterval(() => {
+      uploadCameraFrame();
+    }, 5000);
+
+    return () => {
+      clearInterval(uploadTimer);
+    };
+  }, [
+    isMonitoring,
+    isPaused,
+    cameraReady,
+    faceStatus,
+  ]);
+
   /* ============================================================
      STOP CAMERA
   ============================================================ */
@@ -536,76 +670,7 @@ function Monitoring() {
      Real emotion recognition will be connected later.
   ============================================================ */
 
-  useEffect(() => {
-    if (
-      !isMonitoring ||
-      isPaused
-    ) {
-      return undefined;
-    }
 
-    const emotions = [
-      {
-        name: "Calm",
-        emoji: "😌",
-        confidence: 82,
-        intensity: 76,
-      },
-      {
-        name: "Happy",
-        emoji: "😊",
-        confidence: 91,
-        intensity: 84,
-      },
-      {
-        name: "Neutral",
-        emoji: "😐",
-        confidence: 87,
-        intensity: 52,
-      },
-    ];
-
-    const emotionTimer =
-      setInterval(() => {
-        const next =
-          emotions[
-          Math.floor(
-            Math.random() *
-            emotions.length
-          )
-          ];
-
-        setCurrentEmotion(next);
-
-        setEmotionSignals(
-          (previous) =>
-            previous.map(
-              (signal) => {
-                if (
-                  signal.name ===
-                  next.name
-                ) {
-                  return {
-                    ...signal,
-                    value:
-                      next.intensity,
-                  };
-                }
-
-                return signal;
-              }
-            )
-        );
-      }, 5000);
-
-    return () =>
-      clearInterval(
-        emotionTimer
-      );
-  }, [
-    isMonitoring,
-    isPaused,
-  ]);
 
   /* ============================================================
      TIME FORMAT
