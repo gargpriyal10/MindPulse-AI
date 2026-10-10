@@ -39,6 +39,8 @@ import {
   uploadEmotionImage,
 } from "../../services/api";
 
+import { uploadAudioFile } from "../../services/api";
+
 import "./Monitoring.css";
 
 function Monitoring() {
@@ -63,6 +65,15 @@ function Monitoring() {
 
   const [cameraReady, setCameraReady] =
     useState(false);
+
+  const [isAudioRecording, setIsAudioRecording] = useState(false);
+  const [audioError, setAudioError] = useState("");
+  const [audioResult, setAudioResult] = useState(null);
+
+  const audioStreamRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const audioProcessorRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
   const [faceStatus, setFaceStatus] =
     useState("idle");
@@ -585,6 +596,122 @@ function Monitoring() {
     cameraReady,
     faceStatus,
   ]);
+
+    const startAudioRecording = async () => {
+    try {
+      setAudioError("");
+      setAudioResult(null);
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+
+      audioStreamRef.current = stream;
+
+      const audioContext = new AudioContext();
+      audioContextRef.current = audioContext;
+
+      const source = audioContext.createMediaStreamSource(stream);
+      const processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+      audioProcessorRef.current = processor;
+      audioChunksRef.current = [];
+
+      processor.onaudioprocess = (event) => {
+        audioChunksRef.current.push(
+          new Float32Array(event.inputBuffer.getChannelData(0))
+        );
+
+        event.outputBuffer.getChannelData(0).fill(0);
+      };
+
+      source.connect(processor);
+      processor.connect(audioContext.destination);
+
+      setIsAudioRecording(true);
+    } catch (error) {
+      setAudioError(error.message || "Unable to access microphone.");
+    }
+  };
+
+  const stopAudioRecording = async () => {
+    try {
+      const context = audioContextRef.current;
+
+      if (!context) return;
+
+      audioProcessorRef.current?.disconnect();
+
+      const chunks = audioChunksRef.current;
+      const totalLength = chunks.reduce(
+        (total, chunk) => total + chunk.length,
+        0
+      );
+
+      const samples = new Float32Array(totalLength);
+      let offset = 0;
+
+      chunks.forEach((chunk) => {
+        samples.set(chunk, offset);
+        offset += chunk.length;
+      });
+
+      const wavBuffer = new ArrayBuffer(44 + samples.length * 2);
+      const view = new DataView(wavBuffer);
+
+      const writeString = (position, value) => {
+        for (let i = 0; i < value.length; i++) {
+          view.setUint8(position + i, value.charCodeAt(i));
+        }
+      };
+
+      writeString(0, "RIFF");
+      view.setUint32(4, 36 + samples.length * 2, true);
+      writeString(8, "WAVE");
+      writeString(12, "fmt ");
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, context.sampleRate, true);
+      view.setUint32(28, context.sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeString(36, "data");
+      view.setUint32(40, samples.length * 2, true);
+
+      for (let i = 0; i < samples.length; i++) {
+        const sample = Math.max(-1, Math.min(1, samples[i]));
+        view.setInt16(
+          44 + i * 2,
+          sample < 0 ? sample * 32768 : sample * 32767,
+          true
+        );
+      }
+
+      const audioBlob = new Blob([wavBuffer], {
+        type: "audio/wav",
+      });
+
+      audioStreamRef.current?.getTracks().forEach((track) => track.stop());
+      audioStreamRef.current = null;
+
+      await context.close();
+      audioContextRef.current = null;
+      audioProcessorRef.current = null;
+      setIsAudioRecording(false);
+
+      const response = await uploadAudioFile(audioBlob);
+      setAudioResult(response.data);
+
+    } catch (error) {
+      setAudioError(
+        error.response?.data?.message ||
+        error.message ||
+        "Audio recording or upload failed."
+      );
+      setIsAudioRecording(false);
+    }
+  };
 
   /* ============================================================
      STOP CAMERA
@@ -1314,6 +1441,42 @@ function Monitoring() {
               )}
 
             </div>
+
+            <div style={{ padding: "16px" }}>
+  <h3>Audio Emotion Analysis</h3>
+
+  <button
+    type="button"
+    onClick={
+      isAudioRecording
+        ? stopAudioRecording
+        : startAudioRecording
+    }
+    disabled={!isMonitoring || isPaused}
+  >
+    {isAudioRecording ? "Stop & Analyze Audio" : "Start Audio Recording"}
+  </button>
+
+  {isAudioRecording && (
+    <p>Recording in progress... Please speak clearly.</p>
+  )}
+
+  {audioError && (
+    <p role="alert" style={{ color: "red" }}>
+      {audioError}
+    </p>
+  )}
+
+  {audioResult && (
+    <div>
+      <p>Detected emotion: {audioResult.emotion}</p>
+      <p>
+        Confidence:{" "}
+        {Math.round(Number(audioResult.confidence) * 100)}%
+      </p>
+    </div>
+  )}
+</div>
 
           </Card>
 

@@ -185,6 +185,22 @@ export const uploadEmotionImage = async (imageBlob) => {
   return response;
 };
 
+export const uploadAudioFile = async (audioBlob) => {
+  const formData = new FormData();
+  formData.append("audio", audioBlob, "audio-recording.wav");
+
+  const response = await apiClient.post("/audio/upload", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return response;
+};
+
+
+
+
 // ------------------------------------------------------------
 // Monitoring
 // ------------------------------------------------------------
