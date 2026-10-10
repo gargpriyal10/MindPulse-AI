@@ -200,6 +200,21 @@ export const uploadAudioFile = async (audioBlob) => {
 
 
 
+export const uploadFusionData = async (imageBlob, audioBlob) => {
+  const formData = new FormData();
+
+  formData.append("image", imageBlob, "camera-capture.jpg");
+  formData.append("audio", audioBlob, "audio-recording.wav");
+
+  return await apiClient.post("/emotions/fusion", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+
+
 
 // ------------------------------------------------------------
 // Monitoring

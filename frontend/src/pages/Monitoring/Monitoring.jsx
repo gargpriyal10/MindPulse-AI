@@ -39,7 +39,10 @@ import {
   uploadEmotionImage,
 } from "../../services/api";
 
-import { uploadAudioFile } from "../../services/api";
+import {
+  uploadAudioFile,
+  uploadFusionData,
+} from "../../services/api";
 
 import "./Monitoring.css";
 
@@ -74,6 +77,8 @@ function Monitoring() {
   const audioContextRef = useRef(null);
   const audioProcessorRef = useRef(null);
   const audioChunksRef = useRef([]);
+
+  const latestImageBlobRef = useRef(null);
 
   const [faceStatus, setFaceStatus] =
     useState("idle");
@@ -492,6 +497,10 @@ function Monitoring() {
 
       const imageBlob = await captureCameraFrame();
 
+      if (imageBlob) {
+        latestImageBlobRef.current = imageBlob;
+      }
+
       if (!imageBlob) {
         console.error("Unable to capture camera frame.");
         return;
@@ -597,7 +606,7 @@ function Monitoring() {
     faceStatus,
   ]);
 
-    const startAudioRecording = async () => {
+  const startAudioRecording = async () => {
     try {
       setAudioError("");
       setAudioResult(null);
@@ -700,8 +709,26 @@ function Monitoring() {
       audioProcessorRef.current = null;
       setIsAudioRecording(false);
 
-      const response = await uploadAudioFile(audioBlob);
-      setAudioResult(response.data);
+      const imageBlob = latestImageBlobRef.current;
+
+      if (!imageBlob) {
+        setAudioError(
+          "No camera image available. Please wait for face detection and try again."
+        );
+
+        const response = await uploadAudioFile(audioBlob);
+        setAudioResult(response.data);
+        return;
+      }
+
+      const response = await uploadFusionData(
+  imageBlob,
+  audioBlob
+);
+
+setAudioResult(response.data);
+
+console.log("Fusion analysis result:", response.data);
 
     } catch (error) {
       setAudioError(
@@ -1443,40 +1470,58 @@ function Monitoring() {
             </div>
 
             <div style={{ padding: "16px" }}>
-  <h3>Audio Emotion Analysis</h3>
+              <h3>Audio Emotion Analysis</h3>
 
-  <button
-    type="button"
-    onClick={
-      isAudioRecording
-        ? stopAudioRecording
-        : startAudioRecording
-    }
-    disabled={!isMonitoring || isPaused}
-  >
-    {isAudioRecording ? "Stop & Analyze Audio" : "Start Audio Recording"}
-  </button>
+              <button
+                type="button"
+                onClick={
+                  isAudioRecording
+                    ? stopAudioRecording
+                    : startAudioRecording
+                }
+                disabled={!isMonitoring || isPaused}
+              >
+                {isAudioRecording ? "Stop & Analyze Audio" : "Start Audio Recording"}
+              </button>
 
-  {isAudioRecording && (
-    <p>Recording in progress... Please speak clearly.</p>
-  )}
+              {isAudioRecording && (
+                <p>Recording in progress... Please speak clearly.</p>
+              )}
 
-  {audioError && (
-    <p role="alert" style={{ color: "red" }}>
-      {audioError}
+              {audioError && (
+                <p role="alert" style={{ color: "red" }}>
+                  {audioError}
+                </p>
+              )}
+
+
+            
+{audioResult?.success && audioResult.fusion && (
+  <div>
+    <p>
+      Fused emotion: {audioResult.fusion.emotion}
     </p>
-  )}
+    <p>
+      Confidence:{" "}
+      {Math.round(
+        Number(audioResult.fusion.confidence) * 100
+      )}%
+    </p>
 
-  {audioResult && (
-    <div>
-      <p>Detected emotion: {audioResult.emotion}</p>
-      <p>
-        Confidence:{" "}
-        {Math.round(Number(audioResult.confidence) * 100)}%
-      </p>
-    </div>
-  )}
-</div>
+    <p>
+      Face emotion: {audioResult.face?.emotion} (
+      {Math.round(Number(audioResult.face?.confidence) * 100)}%)
+    </p>
+
+    <p>
+      Audio emotion: {audioResult.audio?.emotion} (
+      {Math.round(Number(audioResult.audio?.confidence) * 100)}%)
+    </p>
+  </div>
+)}
+
+                          
+            </div>
 
           </Card>
 
