@@ -225,73 +225,38 @@ export const getLiveMonitoring = async () => {
 };
 
 export const startMonitoringSession = async () => {
-  return mockRequest(
-    {
-      ...liveMonitoring,
-      isActive: true,
-      status: "Monitoring",
-    },
-    900
-  );
+  return await apiClient.post("/sessions/start");
 };
 
-export const stopMonitoringSession = async () => {
-  return mockRequest(
-    {
-      success: true,
-      isActive: false,
-      status: "Completed",
-      message: "Monitoring session completed successfully.",
-    },
-    700
-  );
+export const stopMonitoringSession = async (sessionId) => {
+  return await apiClient.put(`/sessions/${sessionId}/end`);
 };
 
 // ------------------------------------------------------------
 // Session History
 // ------------------------------------------------------------
 
-export const getSessionHistory = async (filters = {}) => {
-  let results = [...sessionHistory];
-
-  if (filters.emotion && filters.emotion !== "all") {
-    results = results.filter(
-      (session) =>
-        session.dominantEmotion.toLowerCase() ===
-        filters.emotion.toLowerCase()
-    );
-  }
-
-  if (filters.status && filters.status !== "all") {
-    results = results.filter(
-      (session) =>
-        session.status.toLowerCase() === filters.status.toLowerCase()
-    );
-  }
-
-  if (filters.search) {
-    const searchTerm = filters.search.toLowerCase();
-
-    results = results.filter(
-      (session) =>
-        session.dominantEmotion.toLowerCase().includes(searchTerm) ||
-        session.date.includes(searchTerm)
-    );
-  }
-
-  return mockRequest(results);
+export const getSessionHistory = async () => {
+  return await apiClient.get("/sessions");
 };
 
 export const getSessionById = async (sessionId) => {
-  const session = sessionHistory.find(
-    (item) => item.id === sessionId
+  const response = await apiClient.get("/sessions");
+  const sessions = response.data.sessions || [];
+
+  const session = sessions.find(
+    (item) => String(item.id) === String(sessionId)
   );
 
   if (!session) {
     throw new Error(`Session "${sessionId}" was not found.`);
   }
 
-  return mockRequest(session);
+  return { data: session };
+};
+
+export const getBackendSessions = async () => {
+  return await apiClient.get("/sessions");
 };
 
 // ------------------------------------------------------------

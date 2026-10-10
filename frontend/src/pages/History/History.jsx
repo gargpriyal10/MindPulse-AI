@@ -20,8 +20,8 @@ import {
 } from "lucide-react";
 
 import Card from "../../components/ui/Card";
-import { getEmotionHistory } from "../../services/api";
-
+import { getBackendSessions } from "../../services/api";
+import { getMonitoringSessions } from "../../services/monitoringService";
 import "./History.css";
 
 const ITEMS_PER_PAGE = 6;
@@ -132,86 +132,98 @@ function History() {
         return "🙂";
     }
   };
-  useEffect(() => {
-    const loadHistory = async () => {
-      try {
-        const response =
-          await getEmotionHistory();
 
-        const history =
-          response.data.history || [];
 
-        const mappedHistory =
-          history.map((item) => {
-            const date =
-              new Date(item.created_at);
+useEffect(() => {
+  const loadHistory = async () => {
+    const localSessions = getMonitoringSessions();
 
-            const emotion =
-              item.emotion.charAt(0).toUpperCase() +
-              item.emotion.slice(1);
+    const mappedLocal = localSessions.map((item) => {
+      const date = new Date(item.startedAt);
+      const emotion = item.dominantEmotion || "N/A";
 
-            const confidence =
-              Math.round(
-                Number(item.confidence) * 100
-              );
+      return {
+        id: item.id,
+        date: date.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        }),
+        timestamp: date.toISOString(),
+        time: date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        emotion,
+        emoji: getEmoji(emotion),
+        duration: Math.round(Number(item.duration || 0) / 60),
+        score: Number(item.wellbeingScore || 0),
+        confidence: Number(item.confidence || 0),
+        status: item.status || "Completed",
+        note: "Locally saved monitoring session",
+      };
+    });
 
-            return {
-              id: item.id,
+    try {
+      const response = await getBackendSessions();
+      const backendSessions = response.data.sessions || [];
 
-              date: date.toLocaleDateString(
-                "en-US",
-                {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                }
-              ),
+      const mappedBackend = backendSessions.map((item) => {
+        const date = new Date(item.started_at);
+        const endedAt = item.ended_at
+          ? new Date(item.ended_at)
+          : null;
 
-              timestamp: date.toISOString(),
+        return {
+          id: `backend-${item.id}`,
+          date: date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          }),
+          timestamp: date.toISOString(),
+          time: date.toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          emotion: item.emotion
+            ? item.emotion.charAt(0).toUpperCase() + item.emotion.slice(1)
+            : "N/A",
+          emoji: getEmoji(item.emotion || "neutral"),
+          duration: endedAt
+            ? Math.round((endedAt - date) / 60000)
+            : 0,
+          score: 0,
+          confidence: Math.round(Number(item.confidence || 0) * 100),
+          status: item.status
+            ? item.status.charAt(0).toUpperCase() + item.status.slice(1)
+            : "Completed",
+          note: `${item.emotion_count || 0} emotion records`,
+        };
+      });
 
-              time: date.toLocaleTimeString(
-                "en-US",
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
-              ),
+      const backendIds = new Set(
+        backendSessions.map((item) => String(item.id))
+      );
 
-              emotion,
+      const uniqueLocal = mappedLocal.filter(
+        (item) => !backendIds.has(String(item.id))
+      );
 
-              emoji: getEmoji(emotion),
+      setSessions([...mappedBackend, ...uniqueLocal]);
+    } catch (error) {
+      console.error("Failed to load backend sessions:", error);
+      setSessions(mappedLocal);
+    } finally {
+      setCurrentPage(1);
+      setLoading(false);
+    }
+  };
 
-              duration: 1,
+  loadHistory();
+}, []);
 
-              score: confidence,
 
-              confidence,
-
-              status: "Completed",
-
-              note:
-                "Emotion recorded from monitoring session.",
-
-              mediaPath:
-                item.media_path,
-            };
-          });
-
-        setSessions(mappedHistory);
-        setCurrentPage(1);
-      } catch (error) {
-        console.error(
-          "Failed to load emotion history:",
-          error
-        );
-        setSessions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadHistory();
-  }, []);
 
   return (
     <main className="history-page">

@@ -4,7 +4,7 @@ from flask_jwt_extended import get_jwt_identity
 
 from app.database import db
 from app.models.session import Session
-
+from app.models.emotion_history import EmotionHistory
 
 def start_session():
     user_id = get_jwt_identity()
@@ -66,7 +66,6 @@ def end_session(session_id):
         }
     }, 200
 
-
 def get_user_sessions():
     user_id = get_jwt_identity()
 
@@ -77,16 +76,38 @@ def get_user_sessions():
         .all()
     )
 
+    session_data = []
+
+    for session in sessions:
+        emotions = (
+            EmotionHistory.query
+            .filter_by(user_id=user_id)
+            .filter(
+                EmotionHistory.created_at >= session.started_at
+            )
+            .filter(
+                EmotionHistory.created_at <= (
+                    session.ended_at or datetime.utcnow()
+                )
+            )
+            .order_by(EmotionHistory.created_at.desc())
+            .all()
+        )
+
+        latest_emotion = emotions[0] if emotions else None
+
+        session_data.append({
+            "id": session.id,
+            "status": session.status,
+            "started_at": session.started_at,
+            "ended_at": session.ended_at,
+            "emotion": latest_emotion.emotion if latest_emotion else None,
+            "confidence": latest_emotion.confidence if latest_emotion else None,
+            "emotion_count": len(emotions)
+        })
+
     return {
         "success": True,
-        "count": len(sessions),
-        "sessions": [
-            {
-                "id": session.id,
-                "status": session.status,
-                "started_at": session.started_at,
-                "ended_at": session.ended_at
-            }
-            for session in sessions
-        ]
+        "count": len(session_data),
+        "sessions": session_data
     }, 200

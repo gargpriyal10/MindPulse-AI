@@ -30,18 +30,13 @@ import {
 import Button from "../../components/ui/Button";
 import Card from "../../components/ui/Card";
 
-import {
-  startMonitoringSession,
-  finishMonitoringSession,
-} from "../../services/monitoringService";
 
 import {
   uploadEmotionImage,
-} from "../../services/api";
-
-import {
   uploadAudioFile,
   uploadFusionData,
+  startMonitoringSession,
+  stopMonitoringSession,
 } from "../../services/api";
 
 import "./Monitoring.css";
@@ -865,66 +860,52 @@ console.log("Fusion analysis result:", response.data);
      START SESSION
   ============================================================ */
 
-  const handleStartSession =
-    async () => {
-      const cameraStarted =
-        await startCamera();
+  const handleStartSession = async () => {
+  const cameraStarted = await startCamera();
 
-      if (!cameraStarted) {
-        return;
-      }
+  if (!cameraStarted) return;
 
-      const session =
-        startMonitoringSession();
+  try {
+    const response = await startMonitoringSession();
+    sessionRef.current = response.data.session;
 
-      sessionRef.current = session;
-
-      setElapsedSeconds(0);
-      setIsPaused(false);
-      setIsMonitoring(true);
-    };
+    setElapsedSeconds(0);
+    setIsPaused(false);
+    setIsMonitoring(true);
+  } catch (error) {
+    stopCamera();
+    console.error(
+      "Unable to start backend session:",
+      error.response?.data || error.message
+    );
+    setCameraError("Unable to start session. Please login again and retry.");
+  }
+};
 
   /* ============================================================
      STOP SESSION
   ============================================================ */
 
-  const handleStopSession =
-    () => {
-      if (sessionRef.current) {
-        finishMonitoringSession(
-          sessionRef.current.id,
-          {
-            duration: elapsedSeconds,
-            dominantEmotion:
-              currentEmotion.name,
-            confidence:
-              currentEmotion.confidence,
-            wellbeingScore: Math.round(
-              emotionSignals.reduce(
-                (total, signal) => total + Number(signal.value || 0),
-                0
-              ) / emotionSignals.length
-            ),
-            emotions:
-              emotionSignals.reduce(
-                (result, signal) => ({
-                  ...result,
-                  [signal.name]:
-                    signal.value,
-                }),
-                {}
-              ),
-          }
-        );
+  const handleStopSession = async () => {
+  const session = sessionRef.current;
 
-        sessionRef.current = null;
-      }
+  setIsMonitoring(false);
+  setIsPaused(false);
+  stopCamera();
 
-      setIsMonitoring(false);
-      setIsPaused(false);
+  if (!session?.id) return;
 
-      stopCamera();
-    };
+  try {
+    await stopMonitoringSession(session.id);
+    sessionRef.current = null;
+  } catch (error) {
+    console.error(
+      "Unable to end backend session:",
+      error.response?.data || error.message
+    );
+    setCameraError("Session could not be saved as completed. Please try again.");
+  }
+};
 
   /* ============================================================
      PAUSE / RESUME
