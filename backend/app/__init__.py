@@ -10,6 +10,7 @@ from app.routes.privacy_routes import privacy_bp
 from app.models.session import Session
 from app.routes.session_routes import session_bp
 from app.routes.report_routes import report_bp
+from app.routes.notification_routes import notification_bp
 
 def create_app():
     app = Flask(__name__)
@@ -39,6 +40,7 @@ def create_app():
     app.register_blueprint(audio_bp)
     app.register_blueprint(privacy_bp)
     app.register_blueprint(session_bp)
+    app.register_blueprint(notification_bp)
     app.register_blueprint(
     report_bp,
     url_prefix="/api"
