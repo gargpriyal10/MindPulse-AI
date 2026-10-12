@@ -333,14 +333,16 @@ export const getEmotionReport = async (period = "week") => {
 // ------------------------------------------------------------
 
 export const getSettings = async () => {
-  return mockRequest(settings);
+  const response = await apiClient.get("/users/profile");
+  return response.data.user?.preferences || {};
 };
 
 export const updateSettings = async (updatedSettings) => {
-  return mockRequest({
-    ...settings,
-    ...updatedSettings,
+  const response = await apiClient.put("/users/profile", {
+    preferences: updatedSettings,
   });
+
+  return response.data.user?.preferences || {};
 };
 
 // ------------------------------------------------------------

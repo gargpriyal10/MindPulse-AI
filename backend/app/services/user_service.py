@@ -13,6 +13,9 @@ def update_profile(user, data):
     if "age" in data:
         user.age = data["age"]
 
+    if "preferences" in data:
+        user.preferences = data["preferences"]
+
     db.session.commit()
 
     return user

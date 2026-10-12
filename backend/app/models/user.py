@@ -28,6 +28,8 @@ class User(db.Model):
         onupdate=datetime.utcnow
     )
 
+    preferences = db.Column(db.JSON, nullable=False, default=dict)
+
     def set_password(self, password):
         self.password = generate_password_hash(password)
 
@@ -42,5 +44,6 @@ class User(db.Model):
             "gender": self.gender,
             "age": self.age,
             "created_at": self.created_at,
-            "updated_at": self.updated_at
+            "updated_at": self.updated_at,
+            "preferences": self.preferences or {},
         }
